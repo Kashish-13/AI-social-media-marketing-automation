@@ -1,0 +1,181 @@
+{
+  "name": "Dashboard Data API",
+  "nodes": [
+    {
+      "id": "c96edfcd-e025-4fd9-b56d-fd93513ca0f2",
+      "name": "Dashboard Data Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        300
+      ],
+      "webhookId": "80909dd0-4c41-4d29-a8b2-762b2e02321c",
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "campaign-dashboard-data",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      }
+    },
+    {
+      "id": "5e7a5b28-2a58-424e-a4b3-1130c86f4c38",
+      "name": "Read Campaigns",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        220,
+        300
+      ],
+      "alwaysOutputData": true,
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Campaigns"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "61215508-5852-42e3-a3f3-0f45d0ff9354",
+      "name": "Read Status Log",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        440,
+        300
+      ],
+      "alwaysOutputData": true,
+      "executeOnce": true,
+      "parameters": {
+        "operation": "read",
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Status Log"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "4f36eb84-522e-4c47-8ce8-dc279065e2d4",
+      "name": "Build Dashboard Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        300
+      ],
+      "parameters": {
+        "jsCode": "// Returns both tabs as plain JSON. Empty tabs come through as one empty item, so filter them out.\nconst rows = (node) => $(node).all().map((i) => i.json).filter((r) => r && r['Campaign ID']);\nreturn [{ json: { generated_at: $now.toISO(), campaigns: rows('Read Campaigns'), log: rows('Read Status Log') } }];"
+      }
+    },
+    {
+      "id": "4bb4f038-5591-427c-a8f3-092bd3071599",
+      "name": "Send Dashboard Data",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        300
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": "9f69a2cd-1c90-487d-9517-396cf1b09dc2",
+      "name": "Note API",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -60,
+        100
+      ],
+      "parameters": {
+        "content": "## Dashboard Data API (read-only)\nThe dashboard calls GET /webhook/campaign-dashboard-data. This workflow reads the **Campaigns** and **Status Log** tabs and returns them as JSON. It never writes anything.",
+        "width": 1120,
+        "height": 400,
+        "color": 4
+      }
+    }
+  ],
+  "connections": {
+    "Dashboard Data Request": {
+      "main": [
+        [
+          {
+            "node": "Read Campaigns",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Campaigns": {
+      "main": [
+        [
+          {
+            "node": "Read Status Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read Status Log": {
+      "main": [
+        [
+          {
+            "node": "Build Dashboard Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Dashboard Data": {
+      "main": [
+        [
+          {
+            "node": "Send Dashboard Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

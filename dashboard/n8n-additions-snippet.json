@@ -1,0 +1,130 @@
+{
+  "nodes": [
+    {
+      "id": "acabf6eb-6457-4cf8-a00e-74f6a3fa6a7e",
+      "name": "Dashboard Trigger",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -220,
+        520
+      ],
+      "webhookId": "db67753b-03c5-4a36-bdcc-1c1bf7b53b9e",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "campaign-dashboard-submit",
+        "responseMode": "onReceived",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      }
+    },
+    {
+      "id": "419adbd6-3a74-4429-b5df-048c25b4606c",
+      "name": "Dashboard Input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        520
+      ],
+      "parameters": {
+        "jsCode": "// Turns a dashboard submission into the same fields the n8n form produces,\n// so Campaign Input and everything after it run unchanged.\n// The dashboard sends JSON as text/plain (avoids a CORS preflight), so parse strings too.\nlet body = $input.first().json.body ?? $input.first().json;\nif (typeof body === 'string') {\n  try { body = JSON.parse(body); } catch (e) { body = {}; }\n}\nbody = body || {};\n\nconst fields = ['Campaign Brief', 'Product Name', 'Campaign Goal', 'Brand Voice', 'Landing Page URL', 'Launch Date', 'Approver Email'];\nconst out = {};\nfor (const f of fields) out[f] = String(body[f] ?? '').trim();\n\nconst missing = fields.filter((f) => f !== 'Landing Page URL' && !out[f]);\nif (missing.length) throw new Error('Dashboard submission is missing: ' + missing.join(', '));\n\nreturn [{ json: out }];"
+      }
+    },
+    {
+      "id": "a063bd5f-d9b3-4e02-8624-9939b2897809",
+      "name": "Log Review Event",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2460,
+        140
+      ],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "jsCode": "// One Status Log row per reviewed draft, so the dashboard can show real progress.\n// Runs as a side branch; the main routing still receives Evaluate Review's output directly.\nconst r = $input.first().json;\nconst cfg = $('Campaign Input').first().json;\n\nlet nextStep = 'Awaiting human approval';\nif (r.overall_score < r.threshold) {\n  nextStep = r.can_retry ? 'Regenerating draft ' + (r.attempt + 1) : 'Escalated to human approval';\n}\n\nreturn [{\n  json: {\n    'Timestamp': $now.toFormat('yyyy-MM-dd HH:mm:ss'),\n    'Campaign ID': r.campaign_id,\n    'Event': 'Draft Reviewed',\n    'Draft': r.attempt,\n    'Score': r.overall_score,\n    'Threshold': r.threshold,\n    'Decision': r.decision,\n    'Next Step': nextStep,\n    'Brand': cfg.brand_name,\n    'Goal': cfg.campaign_goal,\n    'Brand Voice': cfg.brand_voice,\n    'Scores': JSON.stringify(r.scores),\n    'Problems': JSON.stringify(r.problems),\n    'Recommendations': JSON.stringify(r.improvements),\n    'Strategy': JSON.stringify($('Strategy Agent').first().json.output),\n    'Audience': JSON.stringify($('Audience Agent').first().json.output),\n    'Content': JSON.stringify(r.content)\n  }\n}];"
+      }
+    },
+    {
+      "id": "8286d069-59ec-41ec-ac26-267e1004e63f",
+      "name": "Log Rejection Event",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3180,
+        460
+      ],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "jsCode": "// Status Log row when the approver clicks Reject.\n// Runs as a side branch; Prepare Revision still receives the Human Approval output directly.\nconst r = $('Evaluate Review').last().json;\nconst cfg = $('Campaign Input').first().json;\nconst hardLimit = Number(cfg.max_attempts) + 2;\n\nreturn [{\n  json: {\n    'Timestamp': $now.toFormat('yyyy-MM-dd HH:mm:ss'),\n    'Campaign ID': r.campaign_id,\n    'Event': 'Rejected by Human',\n    'Draft': r.attempt,\n    'Score': r.overall_score,\n    'Threshold': r.threshold,\n    'Decision': 'REJECTED',\n    'Next Step': r.attempt >= hardLimit ? 'Stopped: draft limit reached' : 'Regenerating draft ' + (r.attempt + 1),\n    'Brand': cfg.brand_name,\n    'Goal': cfg.campaign_goal,\n    'Brand Voice': cfg.brand_voice,\n    'Scores': JSON.stringify(r.scores),\n    'Problems': '',\n    'Recommendations': '',\n    'Strategy': '',\n    'Audience': '',\n    'Content': ''\n  }\n}];"
+      }
+    },
+    {
+      "id": "23af6b5c-394b-4c52-ad3c-7e05b60aeafd",
+      "name": "Append Status Log",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        2700,
+        140
+      ],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Status Log"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Dashboard Trigger": {
+      "main": [
+        [
+          {
+            "node": "Dashboard Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Review Event": {
+      "main": [
+        [
+          {
+            "node": "Append Status Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Rejection Event": {
+      "main": [
+        [
+          {
+            "node": "Append Status Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  }
+}

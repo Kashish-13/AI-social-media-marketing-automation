@@ -11,3 +11,6 @@ client_secret*.json
 Thumbs.db
 .vscode/
 node_modules/
+
+# Dev-only dashboard screenshots
+scripts/.dev-screenshots/

@@ -342,6 +342,28 @@ To run a single node: **open it** → **Execute step** (top right of the node pa
 | 2:35–2:50 | Canvas | Zoom out | "Four agents, structured outputs, a quality gate and a human in the loop, all orchestrated in n8n. Thanks for watching!" |
 
 **If the live run is slow:** say "here's one I ran earlier", then open **Executions** → the finished run, and continue from 0:40.
+
+---
+
+## 11. Dashboard (optional, after sections 1–9 pass)
+
+The workflow now also has a dashboard entry point and a **Status Log**. These are additive: the 4 agents, prompts, IF conditions, loop limits, the `Campaigns` columns and both emails are unchanged.
+
+- [ ] Add a **`Status Log`** tab with 17 headers (`sample-data/status-log-headers.csv`).
+- [ ] Add the 5 new nodes. Either paste `dashboard/n8n-additions-snippet.json` and draw 3 connections, or re-import the root JSON.
+- [ ] Point `Append Status Log` at the `Status Log` tab.
+- [ ] Import and activate `dashboard-data-api.json`.
+- [ ] Open `dashboard/index.html` → **⚙︎ → Test connection**.
+
+Full steps, troubleshooting and the **1-minute dashboard Loom flow** are in [`dashboard/README.md`](dashboard/README.md).
+
+**New error sources to know:**
+
+| Error | Where | Fix |
+|---|---|---|
+| *Dashboard submission is missing: …* | `Dashboard Input` | A required field was empty in the dashboard form |
+| Orange "continued on error" badge | `Append Status Log` | The `Status Log` tab or headers are missing. The campaign flow still completes; fix the tab. |
+| Webhook path conflict when activating | Main workflow | Two copies of the workflow are active. Deactivate the old one. |
 <!-- LIVE-TEST-CHECKLIST:END -->
 
 ---

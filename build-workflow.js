@@ -494,7 +494,7 @@ const ifNode = (name, pos, leftValue, operator, rightValue) => add({
 });
 
 // ---------- STICKY NOTES (visual stages) ----------
-sticky('## ① Campaign Intake\nA marketer submits a brief through a hosted form.', [-80, 120], 520, 400, 7);
+sticky('## ① Campaign Intake\nA marketer submits a brief through the hosted n8n form **or** the dashboard. Both feed the same Campaign Input.', [-300, 120], 740, 600, 7);
 sticky('## ② AI Strategy Brain\n**Strategy Agent** → plan · **Audience Agent** → persona', [460, 120], 760, 600, 4);
 sticky('## ③ Create → Review → Improve loop\nContent is scored out of 100. Below 75 → feedback goes back to the Content Agent (max 3 drafts).', [1260, 120], 1600, 800, 5);
 sticky('## ④ Human Approval & Launch\nApprover gets an email with Approve / Reject buttons. Approved → schedule, summary, Google Sheets, final report.', [2880, 0], 1700, 560, 6);
@@ -620,6 +620,106 @@ add({
   }
 });
 
+// ---------- DASHBOARD ADDITIONS (additive: existing nodes are untouched) ----------
+const dashboardInputCode = `// Turns a dashboard submission into the same fields the n8n form produces,
+// so Campaign Input and everything after it run unchanged.
+// The dashboard sends JSON as text/plain (avoids a CORS preflight), so parse strings too.
+let body = $input.first().json.body ?? $input.first().json;
+if (typeof body === 'string') {
+  try { body = JSON.parse(body); } catch (e) { body = {}; }
+}
+body = body || {};
+
+const fields = ['Campaign Brief', 'Product Name', 'Campaign Goal', 'Brand Voice', 'Landing Page URL', 'Launch Date', 'Approver Email'];
+const out = {};
+for (const f of fields) out[f] = String(body[f] ?? '').trim();
+
+const missing = fields.filter((f) => f !== 'Landing Page URL' && !out[f]);
+if (missing.length) throw new Error('Dashboard submission is missing: ' + missing.join(', '));
+
+return [{ json: out }];`;
+
+const logReviewCode = `// One Status Log row per reviewed draft, so the dashboard can show real progress.
+// Runs as a side branch; the main routing still receives Evaluate Review's output directly.
+const r = $input.first().json;
+const cfg = $('Campaign Input').first().json;
+
+let nextStep = 'Awaiting human approval';
+if (r.overall_score < r.threshold) {
+  nextStep = r.can_retry ? 'Regenerating draft ' + (r.attempt + 1) : 'Escalated to human approval';
+}
+
+return [{
+  json: {
+    'Timestamp': $now.toFormat('yyyy-MM-dd HH:mm:ss'),
+    'Campaign ID': r.campaign_id,
+    'Event': 'Draft Reviewed',
+    'Draft': r.attempt,
+    'Score': r.overall_score,
+    'Threshold': r.threshold,
+    'Decision': r.decision,
+    'Next Step': nextStep,
+    'Brand': cfg.brand_name,
+    'Goal': cfg.campaign_goal,
+    'Brand Voice': cfg.brand_voice,
+    'Scores': JSON.stringify(r.scores),
+    'Problems': JSON.stringify(r.problems),
+    'Recommendations': JSON.stringify(r.improvements),
+    'Strategy': JSON.stringify($('Strategy Agent').first().json.output),
+    'Audience': JSON.stringify($('Audience Agent').first().json.output),
+    'Content': JSON.stringify(r.content)
+  }
+}];`;
+
+const logRejectionCode = `// Status Log row when the approver clicks Reject.
+// Runs as a side branch; Prepare Revision still receives the Human Approval output directly.
+const r = $('Evaluate Review').last().json;
+const cfg = $('Campaign Input').first().json;
+const hardLimit = Number(cfg.max_attempts) + 2;
+
+return [{
+  json: {
+    'Timestamp': $now.toFormat('yyyy-MM-dd HH:mm:ss'),
+    'Campaign ID': r.campaign_id,
+    'Event': 'Rejected by Human',
+    'Draft': r.attempt,
+    'Score': r.overall_score,
+    'Threshold': r.threshold,
+    'Decision': 'REJECTED',
+    'Next Step': r.attempt >= hardLimit ? 'Stopped: draft limit reached' : 'Regenerating draft ' + (r.attempt + 1),
+    'Brand': cfg.brand_name,
+    'Goal': cfg.campaign_goal,
+    'Brand Voice': cfg.brand_voice,
+    'Scores': JSON.stringify(r.scores),
+    'Problems': '',
+    'Recommendations': '',
+    'Strategy': '',
+    'Audience': '',
+    'Content': ''
+  }
+}];`;
+
+add({
+  name: 'Dashboard Trigger', type: 'n8n-nodes-base.webhook', typeVersion: 2, position: [-220, 520], webhookId: id(),
+  parameters: { httpMethod: 'POST', path: 'campaign-dashboard-submit', responseMode: 'onReceived', options: { allowedOrigins: '*' } }
+});
+code('Dashboard Input', [0, 520], dashboardInputCode);
+
+// Placed ABOVE "Score ≥ 75?" / "Prepare Revision": with executionOrder v1, n8n runs the
+// higher branch first, so the log row is written before the approval email waits.
+add({ name: 'Log Review Event', type: 'n8n-nodes-base.code', typeVersion: 2, position: [2460, 140], onError: 'continueRegularOutput', parameters: { jsCode: logReviewCode } });
+add({ name: 'Log Rejection Event', type: 'n8n-nodes-base.code', typeVersion: 2, position: [3180, 460], onError: 'continueRegularOutput', parameters: { jsCode: logRejectionCode } });
+add({
+  name: 'Append Status Log', type: 'n8n-nodes-base.googleSheets', typeVersion: 4.5, position: [2700, 140], onError: 'continueRegularOutput',
+  parameters: {
+    operation: 'append',
+    documentId: { __rl: true, mode: 'url', value: '' },
+    sheetName: { __rl: true, mode: 'name', value: 'Status Log' },
+    columns: { mappingMode: 'autoMapInputData', value: {}, matchingColumns: [], schema: [] },
+    options: {}
+  }
+});
+
 // ---------- CONNECTIONS ----------
 const connections = {};
 const main = (from, to, outIndex = 0) => {
@@ -654,6 +754,14 @@ main('Campaign Summary', 'Build Campaign Record');
 main('Build Campaign Record', 'Save to Google Sheets');
 main('Save to Google Sheets', 'Email Final Report');
 
+// Dashboard additions
+main('Dashboard Trigger', 'Dashboard Input');
+main('Dashboard Input', 'Campaign Input');
+main('Evaluate Review', 'Log Review Event');
+main('Log Review Event', 'Append Status Log');
+main('Approved?', 'Log Rejection Event', 1);
+main('Log Rejection Event', 'Append Status Log');
+
 for (const [model, target] of [['Claude · Strategy', 'Strategy Agent'], ['Claude · Audience', 'Audience Agent'], ['Claude · Content', 'Content Agent'], ['Claude · Review', 'Review Agent'], ['Claude · Summary', 'Campaign Summary']]) {
   sub(model, target, 'ai_languageModel');
 }
@@ -671,6 +779,54 @@ const workflow = {
 };
 // `--docs-only` rewrites PROMPTS_AND_CODE.md but leaves the workflow JSON (and its node IDs) untouched.
 if (process.argv[3] !== '--docs-only') fs.writeFileSync(OUT, JSON.stringify(workflow, null, 2));
+
+// ---------- SECOND WORKFLOW: read-only data API for the dashboard ----------
+const apiNodes = [];
+const apiAdd = (n) => { apiNodes.push({ id: id(), ...n }); return n.name; };
+const readSheet = (name, pos, tab, extra) => apiAdd({
+  name, type: 'n8n-nodes-base.googleSheets', typeVersion: 4.5, position: pos, alwaysOutputData: true, ...extra,
+  parameters: {
+    operation: 'read',
+    documentId: { __rl: true, mode: 'url', value: '' },
+    sheetName: { __rl: true, mode: 'name', value: tab },
+    options: {}
+  }
+});
+apiAdd({
+  name: 'Dashboard Data Request', type: 'n8n-nodes-base.webhook', typeVersion: 2, position: [0, 300], webhookId: id(),
+  parameters: { httpMethod: 'GET', path: 'campaign-dashboard-data', responseMode: 'responseNode', options: { allowedOrigins: '*' } }
+});
+readSheet('Read Campaigns', [220, 300], 'Campaigns');
+readSheet('Read Status Log', [440, 300], 'Status Log', { executeOnce: true });
+apiAdd({
+  name: 'Build Dashboard Data', type: 'n8n-nodes-base.code', typeVersion: 2, position: [660, 300],
+  parameters: {
+    jsCode: `// Returns both tabs as plain JSON. Empty tabs come through as one empty item, so filter them out.
+const rows = (node) => $(node).all().map((i) => i.json).filter((r) => r && r['Campaign ID']);
+return [{ json: { generated_at: $now.toISO(), campaigns: rows('Read Campaigns'), log: rows('Read Status Log') } }];`
+  }
+});
+apiAdd({
+  name: 'Send Dashboard Data', type: 'n8n-nodes-base.respondToWebhook', typeVersion: 1.1, position: [880, 300],
+  parameters: {
+    respondWith: 'json',
+    responseBody: '={{ JSON.stringify($json) }}',
+    options: { responseHeaders: { entries: [{ name: 'Access-Control-Allow-Origin', value: '*' }] } }
+  }
+});
+apiAdd({
+  name: 'Note API', type: 'n8n-nodes-base.stickyNote', typeVersion: 1, position: [-60, 100],
+  parameters: { content: '## Dashboard Data API (read-only)\nThe dashboard calls GET /webhook/campaign-dashboard-data. This workflow reads the **Campaigns** and **Status Log** tabs and returns them as JSON. It never writes anything.', width: 1120, height: 400, color: 4 }
+});
+const apiConnections = {
+  'Dashboard Data Request': { main: [[{ node: 'Read Campaigns', type: 'main', index: 0 }]] },
+  'Read Campaigns': { main: [[{ node: 'Read Status Log', type: 'main', index: 0 }]] },
+  'Read Status Log': { main: [[{ node: 'Build Dashboard Data', type: 'main', index: 0 }]] },
+  'Build Dashboard Data': { main: [[{ node: 'Send Dashboard Data', type: 'main', index: 0 }]] }
+};
+const apiWorkflow = { name: 'Dashboard Data API', nodes: apiNodes, connections: apiConnections, pinData: {}, settings: { executionOrder: 'v1' }, meta: { templateCredsSetupCompleted: false } };
+const API_OUT = require('path').join(require('path').dirname(OUT), 'dashboard-data-api.json');
+if (process.argv[3] !== '--docs-only') fs.writeFileSync(API_OUT, JSON.stringify(apiWorkflow, null, 2));
 
 // Also dump prompts/schemas so the guide can quote them verbatim.
 const F = '```';

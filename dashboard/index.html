@@ -1,0 +1,741 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Campaign Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f6f7fb; --surface: #ffffff; --surface-2: #f9fafb; --border: #e6e8ef; --border-strong: #d5d9e3;
+  --text: #0f172a; --text-2: #475569; --text-3: #94a3b8;
+  --accent: #4f46e5; --accent-soft: #eef2ff; --accent-text: #3730a3;
+  --ok: #15803d; --ok-soft: #ecfdf3; --warn: #b45309; --warn-soft: #fffbeb; --bad: #b91c1c; --bad-soft: #fef2f2;
+  --info: #0369a1; --info-soft: #f0f9ff;
+  --shadow: 0 1px 2px rgba(15,23,42,.04), 0 4px 16px rgba(15,23,42,.05);
+  --radius: 14px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0b0f19; --surface: #121826; --surface-2: #0f1522; --border: #1f2737; --border-strong: #2b3547;
+    --text: #e5e9f2; --text-2: #a3aec2; --text-3: #6b778c;
+    --accent: #818cf8; --accent-soft: #1e1b4b; --accent-text: #c7d2fe;
+    --ok: #4ade80; --ok-soft: #052e16; --warn: #fbbf24; --warn-soft: #2a1d05; --bad: #f87171; --bad-soft: #2a0a0a;
+    --info: #38bdf8; --info-soft: #082f49; --shadow: 0 1px 2px rgba(0,0,0,.3);
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--text); font: 14px/1.55 Inter, system-ui, -apple-system, "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+button, input, select, textarea { font: inherit; color: inherit; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 16px; }
+h1, h2, h3 { margin: 0; letter-spacing: -.01em; }
+h2 { font-size: 16px; font-weight: 600; }
+h3 { font-size: 13px; font-weight: 600; color: var(--text-2); text-transform: uppercase; letter-spacing: .04em; }
+.muted { color: var(--text-2); }
+.small { font-size: 12px; color: var(--text-3); }
+[hidden] { display: none !important; }
+
+/* Top bar */
+.top { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 85%, transparent); backdrop-filter: blur(8px); border-bottom: 1px solid var(--border); }
+.top .wrap { display: flex; align-items: center; gap: 12px; height: 60px; }
+.logo { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+.logo-mark { width: 30px; height: 30px; border-radius: 9px; background: linear-gradient(135deg, var(--accent), #7c3aed); display: grid; place-items: center; color: #fff; font-size: 15px; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px; background: var(--surface); border: 1px solid var(--border); font-size: 12px; color: var(--text-2); white-space: nowrap; }
+.dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-3); }
+.dot.ok { background: var(--ok); } .dot.bad { background: var(--bad); }
+.spacer { flex: 1; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--border-strong); background: var(--surface); padding: 8px 14px; border-radius: 10px; cursor: pointer; font-weight: 500; transition: background .15s, border-color .15s; }
+a.btn { color: var(--text); text-decoration: none; }
+.btn:hover { background: var(--surface-2); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn.primary:hover { filter: brightness(1.05); }
+.btn:disabled { opacity: .55; cursor: not-allowed; }
+.btn.lg { padding: 11px 20px; font-size: 15px; border-radius: 12px; }
+select.plain { border: 1px solid var(--border-strong); background: var(--surface); border-radius: 10px; padding: 7px 10px; max-width: 220px; min-width: 0; flex: 0 1 auto; }
+@media (max-width: 760px) { .logo span { display: none; } select.plain { max-width: 160px; } .top .wrap { gap: 8px; } }
+
+/* Hero */
+.hero { padding: 36px 0 20px; }
+.hero h1 { font-size: 28px; font-weight: 700; }
+.hero p { margin: 8px 0 0; color: var(--text-2); max-width: 640px; }
+.flow { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 16px; }
+.flow span { font-size: 12px; padding: 4px 10px; border-radius: 8px; background: var(--surface); border: 1px solid var(--border); color: var(--text-2); }
+.flow i { color: var(--text-3); font-style: normal; font-size: 12px; }
+
+/* Cards */
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; }
+.card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+.card-head .ico { width: 30px; height: 30px; border-radius: 9px; display: grid; place-items: center; background: var(--accent-soft); font-size: 15px; flex: none; }
+.card-head .sub { font-size: 12px; color: var(--text-3); }
+.stack { display: grid; gap: 16px; margin-bottom: 16px; }
+.grid-2 { display: grid; gap: 16px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid-3 { display: grid; gap: 16px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 900px) { .grid-3 { grid-template-columns: 1fr; } }
+@media (max-width: 760px) { .grid-2 { grid-template-columns: 1fr; } .hero h1 { font-size: 22px; } .hide-sm { display: none; } }
+
+/* Segmented control */
+.seg { display: inline-flex; padding: 3px; border-radius: 11px; background: var(--surface-2); border: 1px solid var(--border); margin-bottom: 16px; }
+.seg button { border: 0; background: transparent; padding: 7px 14px; border-radius: 8px; cursor: pointer; color: var(--text-2); font-weight: 500; }
+.seg button.on { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+
+/* Templates */
+.templates { display: grid; gap: 12px; grid-template-columns: repeat(5, minmax(0, 1fr)); }
+@media (max-width: 1000px) { .templates { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 620px) { .templates { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 400px) { .templates { grid-template-columns: 1fr; } }
+.tpl { text-align: left; border: 1px solid var(--border); background: var(--surface); border-radius: 12px; padding: 14px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; transition: border-color .15s, transform .15s, box-shadow .15s; }
+.tpl:hover { border-color: var(--accent); transform: translateY(-1px); box-shadow: var(--shadow); }
+.tpl.on { border-color: var(--accent); background: var(--accent-soft); }
+.tpl .emoji { font-size: 22px; }
+.tpl b { font-size: 14px; }
+.tpl .desc { font-size: 12px; color: var(--text-2); flex: 1; }
+.tpl .use { font-size: 12px; font-weight: 600; color: var(--accent); margin-top: 4px; }
+
+/* Form */
+.form { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.form .full { grid-column: 1 / -1; }
+@media (max-width: 760px) { .form { grid-template-columns: 1fr; } }
+label { display: grid; gap: 6px; font-size: 13px; font-weight: 500; }
+label .req { color: var(--bad); }
+input, select, textarea { width: 100%; border: 1px solid var(--border-strong); background: var(--surface); border-radius: 10px; padding: 9px 12px; outline: none; transition: border-color .15s, box-shadow .15s; }
+input:focus, select:focus, textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 18%, transparent); }
+textarea { min-height: 96px; resize: vertical; }
+.form-foot { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 18px; }
+.filled-flash { animation: flash .8s ease; }
+@keyframes flash { from { background: var(--accent-soft); } to { background: var(--surface); } }
+
+/* Pipeline */
+.pipe { display: grid; gap: 4px; }
+.step { display: flex; align-items: center; gap: 12px; padding: 9px 10px; border-radius: 10px; }
+.step .st { width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; flex: none; border: 1.5px solid var(--border-strong); color: var(--text-3); background: var(--surface); }
+.step .lbl { flex: 1; color: var(--text-3); }
+.step .meta { font-size: 12px; color: var(--text-3); }
+.step.done .st { background: var(--ok); border-color: var(--ok); color: #fff; }
+.step.done .lbl { color: var(--text); }
+.step.active { background: var(--accent-soft); }
+.step.active .lbl { color: var(--accent-text); font-weight: 500; }
+.step.active .st { border-color: var(--accent); border-top-color: transparent; animation: spin .9s linear infinite; }
+.step.wait .st { border-color: var(--warn); color: var(--warn); }
+.step.wait .lbl { color: var(--text); }
+@keyframes spin { to { transform: rotate(360deg); } }
+.bar { height: 4px; border-radius: 4px; background: var(--surface-2); overflow: hidden; margin: 2px 0 14px; }
+.bar > div { height: 100%; width: 30%; background: var(--accent); border-radius: 4px; animation: slide 1.6s ease-in-out infinite; }
+.bar.idle > div { animation: none; width: 100%; background: var(--ok); }
+@keyframes slide { 0% { margin-left: -30%; } 100% { margin-left: 100%; } }
+@media (prefers-reduced-motion: reduce) { .step.active .st, .bar > div { animation: none; } }
+
+/* Badges */
+.badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; white-space: nowrap; }
+.badge.ok { background: var(--ok-soft); color: var(--ok); }
+.badge.warn { background: var(--warn-soft); color: var(--warn); }
+.badge.bad { background: var(--bad-soft); color: var(--bad); }
+.badge.info { background: var(--info-soft); color: var(--info); }
+.badge.neutral { background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border); }
+
+/* Overview */
+.overview { display: flex; flex-wrap: wrap; align-items: center; gap: 18px; }
+.overview .title { flex: 1 1 260px; min-width: 0; }
+.overview .title h2 { font-size: 20px; }
+.kv { display: flex; flex-wrap: wrap; gap: 24px; }
+.kv div { display: grid; gap: 2px; }
+.kv span { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--text-3); }
+.kv b { font-weight: 600; font-size: 13px; }
+
+/* Content blocks */
+dl.facts { margin: 0; display: grid; gap: 12px; }
+dl.facts dt { font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--text-3); margin-bottom: 2px; }
+dl.facts dd { margin: 0; }
+ul.list { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: 12px; padding: 3px 9px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); color: var(--text-2); }
+.chip.tag { color: var(--accent-text); background: var(--accent-soft); border-color: transparent; }
+.post { white-space: pre-wrap; overflow-wrap: anywhere; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; font-size: 13.5px; max-height: 340px; overflow: auto; }
+.platform-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.platform-head .pi { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; color: #fff; font-weight: 700; font-size: 13px; flex: none; }
+.pi.li { background: #0a66c2; } .pi.ig { background: linear-gradient(45deg, #f58529, #dd2a7b, #8134af); } .pi.x { background: #111; }
+.platform-head .grow { flex: 1; min-width: 0; }
+.section-gap { margin-top: 12px; }
+
+/* Score */
+.score-card { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 24px; align-items: center; }
+@media (max-width: 760px) { .score-card { grid-template-columns: 1fr; } }
+.ring { position: relative; width: 168px; height: 168px; margin: 0 auto; }
+.ring svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring .num { position: absolute; inset: 0; display: grid; place-items: center; text-align: center; }
+.ring .num b { font-size: 40px; font-weight: 700; line-height: 1; }
+.ring .num span { font-size: 13px; color: var(--text-3); }
+.score-label { text-align: center; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); margin-bottom: 10px; }
+.crit { display: grid; grid-template-columns: 150px minmax(0, 1fr) 64px; gap: 12px; align-items: center; padding: 5px 0; }
+@media (max-width: 480px) { .crit { grid-template-columns: 110px minmax(0, 1fr) 56px; } }
+.crit .name { font-size: 13px; }
+.crit .name small { display: block; color: var(--text-3); font-size: 11px; }
+.crit .track { height: 8px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--border); overflow: hidden; }
+.crit .fill { height: 100%; border-radius: 8px; transition: width .6s ease; }
+.crit .val { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; font-size: 13px; }
+.drafts { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 14px; }
+
+/* Suggestions / approval / summary */
+.suggest li { padding: 8px 0; border-bottom: 1px dashed var(--border); list-style: none; display: flex; gap: 10px; }
+.suggest li:last-child { border-bottom: 0; }
+.suggest ul { margin: 0; padding: 0; }
+.approval { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+.approval .grow { flex: 1 1 280px; }
+.summary-text { white-space: pre-wrap; background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 14px; font-size: 13px; }
+.empty { border: 1px dashed var(--border-strong); border-radius: 10px; padding: 16px; color: var(--text-3); text-align: center; font-size: 13px; }
+
+/* Toast + dialog */
+.toast { position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); background: var(--text); color: var(--bg); padding: 10px 16px; border-radius: 10px; font-size: 13px; max-width: calc(100% - 32px); box-shadow: var(--shadow); z-index: 30; }
+dialog { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); color: var(--text); padding: 22px; width: min(480px, calc(100% - 32px)); box-shadow: 0 20px 60px rgba(0,0,0,.25); }
+dialog::backdrop { background: rgba(15,23,42,.4); }
+.radio { display: flex; gap: 16px; }
+.radio label { display: flex; align-items: center; gap: 6px; font-weight: 400; }
+.radio input { width: auto; }
+footer { padding: 28px 0 40px; text-align: center; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="logo"><div class="logo-mark">✦</div><span>Campaign Studio</span></div>
+    <span class="pill hide-sm">n8n · Claude · 4 AI agents</span>
+    <div class="spacer"></div>
+    <select id="history" class="plain" aria-label="View a previous campaign"><option value="">Previous campaigns</option></select>
+    <span class="pill" id="conn" title="Connection to the Dashboard Data API"><span class="dot"></span><span class="hide-sm">n8n</span></span>
+    <button class="btn" id="openSettings" aria-label="Settings">⚙︎</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="hero">
+    <h1>AI Marketing Automation</h1>
+    <p>Describe a campaign once. Four Claude agents, orchestrated by n8n, plan it, write platform-native posts, score them, and send them for human approval.</p>
+    <div class="flow"><span>Strategy Agent</span><i>→</i><span>Audience Agent</span><i>→</i><span>Content Agent</span><i>→</i><span>Review Agent</span><i>→</i><span>Quality Gate ≥ 75</span><i>→</i><span>Human Approval</span><i>→</i><span>Google Sheets + Report</span></div>
+  </section>
+
+  <!-- 1. Start a campaign -->
+  <section class="card stack" id="start">
+    <div>
+      <div class="seg" role="tablist">
+        <button class="on" data-mode="template" role="tab">Use a Template</button>
+        <button data-mode="scratch" role="tab">Start from Scratch</button>
+      </div>
+      <div id="templateArea">
+        <div class="card-head"><div class="ico">✦</div><div><h2>Choose a Campaign Template</h2><div class="sub">Pre-fills the campaign form. You can edit every field before generating.</div></div></div>
+        <div class="templates" id="templates"></div>
+      </div>
+    </div>
+
+    <form id="campaignForm" autocomplete="off">
+      <div class="card-head"><div class="ico">✎</div><div><h2>Campaign Brief</h2><div class="sub">Same fields as the n8n form, sent to the same workflow.</div></div></div>
+      <div class="form">
+        <label><span>Product Name <span class="req">*</span></span><input name="Product Name" required placeholder="e.g. StudyPilot"></label>
+        <label><span>Campaign Goal <span class="req">*</span></span>
+          <select name="Campaign Goal" required>
+            <option value="">Select a goal</option>
+            <option>Waitlist / Sign-ups</option><option>Product Launch Awareness</option><option>App Downloads</option><option>Event Registrations</option><option>Sales</option>
+          </select>
+        </label>
+        <label class="full"><span>Campaign Brief <span class="req">*</span></span><textarea name="Campaign Brief" required placeholder="What are you launching, for whom, and what makes it different?"></textarea></label>
+        <label><span>Brand Voice <span class="req">*</span></span>
+          <select name="Brand Voice" required>
+            <option value="">Select a voice</option>
+            <option>Friendly &amp; Helpful</option><option>Bold &amp; Energetic</option><option>Witty &amp; Playful</option><option>Professional &amp; Credible</option>
+          </select>
+        </label>
+        <label><span>Landing Page URL</span><input name="Landing Page URL" type="url" placeholder="https://"></label>
+        <label><span>Launch Date <span class="req">*</span></span><input name="Launch Date" type="date" required></label>
+        <label><span>Approver Email <span class="req">*</span></span><input name="Approver Email" type="email" required placeholder="you@example.com"></label>
+      </div>
+      <div class="form-foot">
+        <button class="btn primary lg" type="submit" id="generate">✦ Generate Campaign</button>
+        <span class="small">Takes about 1–2 minutes. The approval request goes to the approver's inbox.</span>
+      </div>
+    </form>
+  </section>
+
+  <!-- 2. Pipeline -->
+  <section class="card stack" id="pipelineCard" hidden>
+    <div class="card-head" style="margin-bottom:6px">
+      <div class="ico">⚡</div>
+      <div style="flex:1"><h2>AI Marketing Pipeline</h2><div class="sub" id="pipeSub">Running in n8n</div></div>
+      <span class="badge neutral" id="elapsed">0:00</span>
+    </div>
+    <div class="bar" id="pipeBar"><div></div></div>
+    <div class="pipe" id="pipe"></div>
+    <div class="small" id="pipeNote" style="margin-top:8px"></div>
+  </section>
+
+  <!-- 3. Results -->
+  <section id="results" hidden>
+    <div class="card stack">
+      <h3 style="margin-bottom:12px">AI Campaign Overview</h3>
+      <div class="overview">
+        <div class="title"><h2 id="ovName">—</h2><div class="muted" id="ovProduct"></div></div>
+        <div class="kv">
+          <div><span>Campaign Goal</span><b id="ovGoal">—</b></div>
+          <div><span>Brand Voice</span><b id="ovVoice">—</b></div>
+          <div><span>Campaign ID</span><b id="ovId">—</b></div>
+        </div>
+        <span class="badge neutral" id="ovStatus">—</span>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:16px">
+      <div class="card"><div class="card-head"><div class="ico">🧭</div><div><h2>AI Strategy</h2><div class="sub">Marketing Strategy Agent</div></div></div><div id="strategy"></div></div>
+      <div class="card"><div class="card-head"><div class="ico">👥</div><div><h2>Audience Intelligence</h2><div class="sub">Audience Intelligence Agent</div></div></div><div id="audience"></div></div>
+    </div>
+
+    <div class="card-head" style="margin:8px 0 10px"><div class="ico">✍︎</div><div><h2>Platform Content</h2><div class="sub" id="contentSub">Content Creation Agent</div></div></div>
+    <div class="grid-3" style="margin-bottom:16px">
+      <div class="card" id="cLinkedIn"></div>
+      <div class="card" id="cInstagram"></div>
+      <div class="card" id="cX"></div>
+    </div>
+
+    <div class="card stack">
+      <div class="score-card">
+        <div>
+          <div class="score-label">AI Campaign Quality</div>
+          <div class="ring" id="ring"></div>
+          <div style="text-align:center;margin-top:12px" id="scoreBadge"></div>
+        </div>
+        <div>
+          <div class="card-head" style="margin-bottom:8px"><div class="ico">◎</div><div><h2>Score breakdown</h2><div class="sub">Content Review Agent scores · weighted overall calculated in n8n</div></div></div>
+          <div id="criteria"></div>
+          <div class="drafts" id="drafts"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card stack suggest" id="suggestCard" hidden>
+      <div class="card-head"><div class="ico">💡</div><div><h2>AI Optimization Suggestions</h2><div class="sub" id="suggestSub">From the Content Review Agent</div></div></div>
+      <ul id="suggestions"></ul>
+    </div>
+
+    <div class="card stack">
+      <div class="card-head"><div class="ico">🛡︎</div><div><h2>Human Approval</h2><div class="sub">Nothing is scheduled until a person approves it.</div></div></div>
+      <div class="approval">
+        <div class="grow"><div style="margin-bottom:6px"><span class="badge neutral" id="apStatus">—</span></div><div class="muted" id="apText"></div></div>
+        <a class="btn" id="apBtn" href="https://mail.google.com/mail/u/0/#search/subject%3A%22Approve+campaign%22" target="_blank" rel="noopener">Open approval email ↗</a>
+      </div>
+    </div>
+
+    <div class="card stack">
+      <div class="card-head"><div class="ico">📋</div><div><h2>Campaign Summary</h2><div class="sub">Campaign Summary step · saved to Google Sheets</div></div></div>
+      <div class="kv" style="margin-bottom:16px" id="sumKv"></div>
+      <div id="summary"></div>
+    </div>
+  </section>
+</main>
+
+<footer class="small">Campaign data comes from your n8n workflow and Google Sheet. Nothing on this page is generated in the browser.</footer>
+
+<dialog id="settings">
+  <form method="dialog" id="settingsForm" style="display:grid;gap:14px">
+    <h2>Connection settings</h2>
+    <label>n8n base URL<input name="base" placeholder="http://localhost:5678"></label>
+    <div>
+      <div style="font-size:13px;font-weight:500;margin-bottom:6px">Webhook mode</div>
+      <div class="radio">
+        <label><input type="radio" name="mode" value="production"> Production (workflows Active)</label>
+        <label><input type="radio" name="mode" value="test"> Test</label>
+      </div>
+    </div>
+    <div class="small" id="testResult">Uses <code>/webhook/campaign-dashboard-submit</code> and <code>/webhook/campaign-dashboard-data</code>.</div>
+    <div style="display:flex;gap:10px;justify-content:flex-end">
+      <button class="btn" type="button" id="testConn">Test connection</button>
+      <button class="btn primary" value="save">Save</button>
+    </div>
+  </form>
+</dialog>
+
+<div class="toast" id="toast" hidden></div>
+
+<script>
+'use strict';
+
+/* ---------- Settings (per-browser convenience only) ---------- */
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('cs.' + k); return v === null ? d : v; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('cs.' + k, v); } catch (e) { /* storage blocked: settings just won't persist */ } }
+};
+const cfg = () => ({ base: store.get('base', 'http://localhost:5678').replace(/\/+$/, ''), mode: store.get('mode', 'production') });
+const endpoint = (path) => cfg().base + (cfg().mode === 'test' ? '/webhook-test/' : '/webhook/') + path;
+
+/* ---------- Helpers ---------- */
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const parse = (v, d) => { if (v && typeof v === 'object') return v; try { return v ? JSON.parse(v) : d; } catch (e) { return d; } };
+const num = (v) => { const n = Number(v); return Number.isFinite(n) ? n : null; };
+const list = (arr) => (Array.isArray(arr) && arr.length ? '<ul class="list">' + arr.map((x) => '<li>' + esc(x) + '</li>').join('') + '</ul>' : '<span class="small">—</span>');
+const chips = (arr, cls) => (Array.isArray(arr) && arr.length ? '<div class="chips">' + arr.map((x) => '<span class="chip ' + (cls || '') + '">' + esc(x) + '</span>').join('') + '</div>' : '');
+let toastTimer;
+function toast(msg, ms) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, ms || 4500); }
+
+/* ---------- Templates: they only pre-fill the existing form ---------- */
+const nextMonday = () => { const d = new Date(); d.setDate(d.getDate() + ((8 - d.getDay()) % 7 || 7)); return d.toISOString().slice(0, 10); };
+const TEMPLATES = [
+  { id: 'launch', emoji: '🚀', name: 'Product Launch', desc: 'Announce a new product and build launch-day buzz.',
+    values: { 'Product Name': 'FocusFlow', 'Campaign Goal': 'Product Launch Awareness', 'Brand Voice': 'Bold & Energetic', 'Landing Page URL': 'https://focusflow.example.com',
+      'Campaign Brief': 'Launch FocusFlow, an AI focus planner for remote teams that blocks deep-work time in everyone\'s calendar and summarises meetings into action items. Launch-week offer: free for teams of up to 10 for the first 3 months.' } },
+  { id: 'edtech', emoji: '🎓', name: 'Student / EdTech', desc: 'Reach college students with a learning product.',
+    values: { 'Product Name': 'StudyPilot', 'Campaign Goal': 'Product Launch Awareness', 'Brand Voice': 'Friendly & Helpful', 'Landing Page URL': 'https://studypilot.example.com',
+      'Campaign Brief': 'AI-powered study assistant for college students that helps them create notes, generate quizzes and prepare for exams more efficiently.' } },
+  { id: 'app', emoji: '📱', name: 'App Promotion', desc: 'Drive installs for a mobile app.',
+    values: { 'Product Name': 'FitBite', 'Campaign Goal': 'App Downloads', 'Brand Voice': 'Witty & Playful', 'Landing Page URL': 'https://fitbite.example.com',
+      'Campaign Brief': 'Promote FitBite, a mobile app that turns whatever is in your fridge into a healthy 15-minute recipe and a weekly grocery list. Free on iOS and Android, with an optional premium plan.' } },
+  { id: 'ecom', emoji: '🛍️', name: 'E-commerce', desc: 'Promote products and drive online sales.',
+    values: { 'Product Name': 'Terra Threads', 'Campaign Goal': 'Sales', 'Brand Voice': 'Friendly & Helpful', 'Landing Page URL': 'https://terrathreads.example.com',
+      'Campaign Brief': 'Promote the new autumn collection from Terra Threads, a sustainable clothing brand using recycled cotton and plastic-free packaging. 15% off the first order this week, with free shipping over $50.' } },
+  { id: 'event', emoji: '📢', name: 'Event Promotion', desc: 'Fill seats for an event or webinar.',
+    values: { 'Product Name': 'Campus Startup Demo Night', 'Campaign Goal': 'Event Registrations', 'Brand Voice': 'Professional & Credible', 'Landing Page URL': 'https://demonight.example.com',
+      'Campaign Brief': 'Promote Campus Startup Demo Night, an evening where 10 student-founded startups pitch to local investors and mentors. Free entry, limited to 200 seats, registration required.' } }
+];
+
+function renderTemplates() {
+  $('#templates').innerHTML = TEMPLATES.map((t) =>
+    '<button type="button" class="tpl" data-id="' + t.id + '"><span class="emoji">' + t.emoji + '</span><b>' + esc(t.name) + '</b><span class="desc">' + esc(t.desc) + '</span><span class="use">Use template →</span></button>'
+  ).join('');
+  $('#templates').addEventListener('click', (e) => {
+    const card = e.target.closest('.tpl'); if (!card) return;
+    const t = TEMPLATES.find((x) => x.id === card.dataset.id);
+    document.querySelectorAll('.tpl').forEach((el) => el.classList.toggle('on', el === card));
+    const form = $('#campaignForm');
+    for (const [k, v] of Object.entries(t.values)) { const el = form.elements[k]; el.value = v; el.classList.remove('filled-flash'); void el.offsetWidth; el.classList.add('filled-flash'); }
+    if (!form.elements['Launch Date'].value) form.elements['Launch Date'].value = nextMonday();
+    if (!form.elements['Approver Email'].value) form.elements['Approver Email'].value = store.get('approver', '');
+    form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+
+document.querySelector('.seg').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  document.querySelectorAll('.seg button').forEach((x) => x.classList.toggle('on', x === b));
+  const scratch = b.dataset.mode === 'scratch';
+  $('#templateArea').hidden = scratch;
+  if (scratch) {
+    const form = $('#campaignForm'); const keep = form.elements['Approver Email'].value;
+    form.reset(); form.elements['Approver Email'].value = keep; form.elements['Launch Date'].value = nextMonday();
+    document.querySelectorAll('.tpl').forEach((el) => el.classList.remove('on'));
+    form.elements['Product Name'].focus();
+  }
+});
+
+/* ---------- Data API ---------- */
+let data = { campaigns: [], log: [] };
+async function fetchData() {
+  const res = await fetch(endpoint('campaign-dashboard-data') + '?t=' + Date.now(), { cache: 'no-store' });
+  if (!res.ok) throw new Error('Dashboard Data API returned HTTP ' + res.status);
+  const json = await res.json();
+  data = { campaigns: Array.isArray(json.campaigns) ? json.campaigns : [], log: Array.isArray(json.log) ? json.log : [] };
+  setConn(true);
+  renderHistory();
+  return data;
+}
+function setConn(ok, msg) {
+  const c = $('#conn'); c.querySelector('.dot').className = 'dot ' + (ok ? 'ok' : 'bad');
+  c.title = ok ? 'Connected to the Dashboard Data API' : (msg || 'Cannot reach the Dashboard Data API');
+}
+const idsIn = (d) => new Set([...d.campaigns, ...d.log].map((r) => String(r['Campaign ID'])));
+
+function renderHistory() {
+  const sel = $('#history'); const current = sel.value;
+  const seen = new Map();
+  for (const r of data.log) seen.set(String(r['Campaign ID']), r['Brand'] || '');
+  for (const r of data.campaigns) seen.set(String(r['Campaign ID']), r['Brand'] || '');
+  const ids = [...seen.keys()].sort().reverse();
+  sel.innerHTML = '<option value="">Previous campaigns</option>' + ids.map((id) => '<option value="' + esc(id) + '">' + esc((seen.get(id) || 'Campaign') + ' · ' + id) + '</option>').join('');
+  sel.value = ids.includes(current) ? current : '';
+}
+
+/* ---------- Campaign state derived only from real rows ---------- */
+function reviewFromRecord(rec) {
+  const scores = {};
+  String(rec['Score Breakdown'] || '').split(',').forEach((pair) => { const [k, v] = pair.split(':').map((s) => s && s.trim()); if (k && v) scores[k] = Number(v); });
+  return {
+    'Draft': rec['Drafts Needed'], 'Score': rec['Quality Score'], 'Threshold': 75, 'Brand': rec['Brand'], 'Goal': rec['Goal'], 'Brand Voice': '',
+    'Scores': scores, 'Recommendations': [],
+    'Strategy': { campaign_name: rec['Campaign Name'], target_audience: rec['Target Audience'], campaign_angle: rec['Campaign Angle'], tone: rec['Tone'], primary_cta: rec['Primary CTA'] },
+    'Audience': {},
+    'Content': { linkedin: { post: rec['LinkedIn Post'] }, instagram: { caption: rec['Instagram Caption'], visual_concept: rec['Instagram Visual'] }, x: { post: rec['X Post'], thread: String(rec['X Thread'] || '').split(/\n\s*\n/).filter(Boolean) } }
+  };
+}
+function campaignState(id) {
+  const log = data.log.filter((r) => String(r['Campaign ID']) === id);
+  const record = data.campaigns.find((r) => String(r['Campaign ID']) === id) || null;
+  const reviews = log.filter((r) => r['Event'] === 'Draft Reviewed');
+  // Campaigns approved before the Status Log existed only have their Campaigns row: rebuild the view from it.
+  const latestReview = reviews[reviews.length - 1] || (record ? reviewFromRecord(record) : null);
+  const latest = log[log.length - 1] || null;
+  let status = 'running';
+  if (record) status = 'approved';
+  else if (latest && latest['Event'] === 'Rejected by Human') status = /^Stopped/.test(latest['Next Step']) ? 'stopped' : 'rejected';
+  else if (latest && /^Regenerating/.test(latest['Next Step'] || '')) status = 'revising';
+  else if (latest && /approval/i.test(latest['Next Step'] || '')) status = 'pending';
+  return { id, log, record, reviews, latestReview, latest, status };
+}
+const STATUS = {
+  running:  { label: 'Generating', cls: 'info' },
+  revising: { label: 'Improving draft', cls: 'info' },
+  pending:  { label: 'Pending Approval', cls: 'warn' },
+  rejected: { label: 'Rejected · rewriting', cls: 'bad' },
+  stopped:  { label: 'Stopped · draft limit', cls: 'bad' },
+  approved: { label: 'Approved & Scheduled', cls: 'ok' }
+};
+
+/* ---------- Pipeline ---------- */
+const STEPS = ['Understanding campaign', 'Building marketing strategy', 'Analysing target audience', 'Creating platform-specific content', 'Reviewing campaign quality', 'Human approval', 'Saved to Google Sheets & report sent'];
+let tracking = null; // { product, knownIds, startedAt, id }
+let pollTimer = null, clockTimer = null;
+
+function renderPipeline(st) {
+  const elapsed = tracking ? Math.floor((Date.now() - tracking.startedAt) / 1000) : 0;
+  const states = STEPS.map(() => ({ c: '', meta: '' }));
+  let sub = 'Running in n8n';
+  let note = '';
+  if (!st || !st.latestReview) {
+    // No real signal yet: the agents run inside n8n. Highlight the likely current stage, tick nothing.
+    const est = Math.min(3, Math.floor(elapsed / 20));
+    states[est].c = 'active';
+    note = 'Steps are marked complete only when n8n reports the first quality review (usually within 1–2 minutes).';
+  } else {
+    for (let i = 0; i < 5; i++) states[i].c = 'done';
+    const r = st.latestReview;
+    states[4].meta = st.reviews.map((x) => 'Draft ' + x['Draft'] + ': ' + x['Score']).join(' → ');
+    if (st.status === 'revising' || st.status === 'rejected') {
+      states[3].c = 'active'; states[4].c = '';
+      states[3].meta = 'Draft ' + (Number(r['Draft']) + 1) + (st.status === 'rejected' ? ' (approver rejected)' : ' (score below ' + r['Threshold'] + ')');
+      sub = st.status === 'rejected' ? 'Approver rejected the draft. Rewriting' : 'Quality below ' + r['Threshold'] + '. Improving the draft';
+    } else if (st.status === 'pending') {
+      states[5].c = 'wait'; states[5].meta = 'Waiting for approver (email sent)';
+      sub = 'Waiting for human approval';
+    } else if (st.status === 'stopped') {
+      states[5].c = 'wait'; states[5].meta = 'Stopped after ' + r['Draft'] + ' drafts';
+      sub = 'Stopped: draft limit reached';
+    } else if (st.status === 'approved') {
+      states[5].c = 'done'; states[5].meta = 'Approved';
+      states[6].c = 'done'; states[6].meta = 'Saved · ' + (st.record['Created At'] || '');
+      sub = 'Campaign approved and scheduled';
+    }
+  }
+  $('#pipe').innerHTML = STEPS.map((s, i) => {
+    const c = states[i].c;
+    const icon = c === 'done' ? '✓' : c === 'wait' ? '⏳' : c === 'active' ? '' : (i + 1);
+    return '<div class="step ' + c + '"><span class="st">' + icon + '</span><span class="lbl">' + esc(s) + '</span><span class="meta">' + esc(states[i].meta) + '</span></div>';
+  }).join('');
+  $('#pipeSub').textContent = sub;
+  $('#pipeNote').textContent = note;
+  const finished = st && (st.status === 'approved' || st.status === 'stopped');
+  $('#pipeBar').classList.toggle('idle', !!finished);
+  $('#elapsed').textContent = Math.floor(elapsed / 60) + ':' + String(elapsed % 60).padStart(2, '0');
+}
+
+/* ---------- Results ---------- */
+const CRITERIA = [
+  ['hook', 'Hook', 20], ['engagement', 'Engagement', 20], ['platform_fit', 'Platform Fit', 15], ['clarity', 'Clarity', 15],
+  ['brand_alignment', 'Brand Alignment', 10], ['cta', 'Call to Action', 10], ['grammar', 'Grammar', 10]
+];
+const scoreColor = (v, th) => (v >= th ? 'var(--ok)' : v >= th - 15 ? 'var(--warn)' : 'var(--bad)');
+
+function renderResults(st) {
+  const r = st.latestReview; if (!r) { $('#results').hidden = true; return; }
+  $('#results').hidden = false;
+  const strategy = parse(r['Strategy'], {}) || {};
+  const audience = parse(r['Audience'], {}) || {};
+  const content = parse(r['Content'], {}) || {};
+  const scores = parse(r['Scores'], {}) || {};
+  const recs = parse(r['Recommendations'], []) || [];
+  const score = num(r['Score']); const th = num(r['Threshold']) ?? 75;
+  const S = STATUS[st.status];
+
+  // Overview
+  $('#ovName').textContent = strategy.campaign_name || r['Brand'] || 'Campaign';
+  $('#ovProduct').textContent = r['Brand'] || '';
+  $('#ovGoal').textContent = r['Goal'] || '—';
+  $('#ovVoice').textContent = r['Brand Voice'] || '—';
+  $('#ovId').textContent = st.id;
+  $('#ovStatus').className = 'badge ' + S.cls; $('#ovStatus').textContent = S.label;
+
+  // Strategy
+  $('#strategy').innerHTML = '<dl class="facts">' +
+    (strategy.objective ? '<div><dt>Objective</dt><dd>' + esc(strategy.objective) + '</dd></div>' : '') +
+    (strategy.campaign_angle ? '<div><dt>Campaign angle</dt><dd><b>' + esc(strategy.campaign_angle) + '</b></dd></div>' : '') +
+    (strategy.key_message ? '<div><dt>Key message</dt><dd>' + esc(strategy.key_message) + '</dd></div>' : '') +
+    '<div class="grid-2" style="gap:12px">' +
+      (strategy.tone ? '<div><dt>Tone</dt><dd>' + esc(strategy.tone) + '</dd></div>' : '') +
+      (strategy.primary_cta ? '<div><dt>Primary CTA</dt><dd>' + esc(strategy.primary_cta) + '</dd></div>' : '') +
+    '</div>' +
+    (strategy.value_propositions ? '<div><dt>Value propositions</dt><dd>' + list(strategy.value_propositions) + '</dd></div>' : '') +
+    (strategy.kpis ? '<div><dt>KPIs</dt><dd>' + list(strategy.kpis) + '</dd></div>' : '') +
+    '</dl>';
+
+  // Audience
+  const p = audience.persona || {};
+  $('#audience').innerHTML = '<dl class="facts">' +
+    '<div><dt>Primary audience</dt><dd><b>' + esc(p.name || '') + '</b>' + (p.age_range ? ' · ' + esc(p.age_range) : '') + '<div class="muted">' + esc(p.description || strategy.target_audience || '') + '</div></dd></div>' +
+    (audience.pain_points ? '<div><dt>Pain points</dt><dd>' + list(audience.pain_points) + '</dd></div>' : '') +
+    (audience.motivations ? '<div><dt>Needs &amp; motivations</dt><dd>' + list(audience.motivations) + '</dd></div>' : '') +
+    (audience.best_hook_angles ? '<div><dt>Audience insights · hook angles</dt><dd>' + list(audience.best_hook_angles) + '</dd></div>' : '') +
+    (audience.messaging_style && audience.messaging_style.words_they_use ? '<div><dt>Words they use</dt><dd>' + chips(audience.messaging_style.words_they_use) + '</dd></div>' : '') +
+    '</dl>';
+
+  // Platform content
+  const li = content.linkedin || {}, ig = content.instagram || {}, x = content.x || {};
+  $('#contentSub').textContent = 'Content Creation Agent · draft ' + r['Draft'] + (content.campaign_tagline ? ' · "' + content.campaign_tagline + '"' : '');
+  $('#cLinkedIn').innerHTML = '<div class="platform-head"><span class="pi li">in</span><div class="grow"><b>LinkedIn</b><div class="small">Story-style post</div></div></div>' +
+    '<div class="post">' + esc(li.post || '') + '</div>';
+  $('#cInstagram').innerHTML = '<div class="platform-head"><span class="pi ig">◎</span><div class="grow"><b>Instagram</b><div class="small">Caption + visual concept</div></div></div>' +
+    '<div class="post">' + esc(ig.caption || '') + '</div>' +
+    (ig.hashtags && ig.hashtags.length ? '<div class="section-gap">' + chips(ig.hashtags, 'tag') + '</div>' : '') +
+    (ig.visual_concept ? '<div class="section-gap"><h3 style="margin-bottom:4px">Visual concept</h3><div class="muted" style="font-size:13px">' + esc(ig.visual_concept) + '</div></div>' : '');
+  const len = (x.post || '').length;
+  $('#cX').innerHTML = '<div class="platform-head"><span class="pi x">𝕏</span><div class="grow"><b>X / Twitter</b><div class="small">Post + thread</div></div><span class="badge ' + (len <= 280 ? 'neutral' : 'bad') + '">' + len + '/280</span></div>' +
+    '<div class="post">' + esc(x.post || '') + '</div>' +
+    (Array.isArray(x.thread) && x.thread.length ? '<div class="section-gap"><h3 style="margin-bottom:6px">Thread</h3>' + x.thread.map((t, i) => '<div class="post" style="margin-top:6px">' + (i + 1) + '/ ' + esc(t) + '</div>').join('') + '</div>' : '');
+
+  // Score
+  const C = 2 * Math.PI * 70, pct = Math.max(0, Math.min(100, score ?? 0)) / 100;
+  $('#ring').innerHTML = '<svg viewBox="0 0 168 168"><circle cx="84" cy="84" r="70" fill="none" stroke="var(--surface-2)" stroke-width="14"/>' +
+    '<circle cx="84" cy="84" r="70" fill="none" stroke="' + scoreColor(score ?? 0, th) + '" stroke-width="14" stroke-linecap="round" stroke-dasharray="' + (C * pct) + ' ' + C + '"/></svg>' +
+    '<div class="num"><div><b>' + (score ?? '—') + '</b><span> / 100</span></div></div>';
+  $('#scoreBadge').innerHTML = score === null ? '' : (score >= th ? '<span class="badge ok">✅ Ready for Approval</span>' : '<span class="badge warn">⚠️ Needs Improvement</span>') +
+    '<div class="small" style="margin-top:6px">Quality bar: ' + th + '</div>';
+  $('#criteria').innerHTML = CRITERIA.filter(([k]) => scores[k] !== undefined).map(([k, label, w]) => {
+    const v = num(scores[k]) ?? 0;
+    return '<div class="crit"><div class="name">' + label + '<small>weight ' + w + '%</small></div><div class="track"><div class="fill" style="width:' + Math.max(0, Math.min(100, v)) + '%;background:' + scoreColor(v, th) + '"></div></div><div class="val">' + v + ' / 100</div></div>';
+  }).join('');
+  $('#drafts').innerHTML = st.reviews.length > 1 || st.log.some((l) => l['Event'] === 'Rejected by Human')
+    ? '<span class="small">Draft history:</span>' + st.log.map((l) => l['Event'] === 'Draft Reviewed'
+        ? '<span class="chip">Draft ' + esc(l['Draft']) + ' · ' + esc(l['Score']) + '</span>'
+        : '<span class="chip" style="color:var(--bad)">Rejected by approver</span>').join('<span class="small">→</span>')
+    : '<span class="small">Approved on the first draft by the quality gate.</span>';
+
+  // Suggestions: shown only when the reviewer actually returned some
+  $('#suggestCard').hidden = !recs.length;
+  $('#suggestSub').textContent = 'From the Content Review Agent · draft ' + r['Draft'];
+  $('#suggestions').innerHTML = recs.map((t) => '<li><span>•</span><span>' + esc(t) + '</span></li>').join('');
+
+  // Approval
+  const AP = {
+    running: ['neutral', 'Not requested yet', 'The approval request is sent once a draft passes the quality gate.'],
+    revising: ['neutral', 'Not requested yet', 'The draft is being improved before it goes to the approver.'],
+    pending: ['warn', 'Pending Approval', 'An approval email was sent to the approver. Approve or reject it there; this page updates automatically.'],
+    rejected: ['bad', 'Rejected', 'The approver rejected the draft. The Content Agent is writing a new version, and a fresh approval email will follow.'],
+    stopped: ['bad', 'Rejected', 'The draft limit was reached after repeated rejections. Revise the brief and submit again.'],
+    approved: ['ok', 'Approved', 'Approved by the approver. The campaign was scheduled, saved and reported.']
+  }[st.status];
+  $('#apStatus').className = 'badge ' + AP[0]; $('#apStatus').textContent = AP[1]; $('#apText').textContent = AP[2];
+  $('#apBtn').hidden = !(st.status === 'pending');
+
+  // Summary
+  const rec = st.record;
+  const drafts = rec ? rec['Drafts Needed'] : (st.reviews.length || '—');
+  $('#sumKv').innerHTML = [
+    ['Campaign ID', st.id], ['Created', rec ? rec['Created At'] : (st.log[0] && st.log[0]['Timestamp']) || '—'], ['Drafts', drafts],
+    ['Approval status', AP[1]], ['Final status', rec ? 'Scheduled · saved · reported' : 'In progress']
+  ].map(([k, v]) => '<div><span>' + k + '</span><b>' + esc(v) + '</b></div>').join('');
+  $('#summary').innerHTML = rec
+    ? '<div class="summary-text">' + esc(rec['Summary'] || '') + '</div>' +
+      (rec['Publishing Schedule'] ? '<h3 style="margin:16px 0 8px">Publishing schedule</h3><div class="summary-text">' + esc(rec['Publishing Schedule']) + '</div>' : '')
+    : '<div class="empty">The campaign summary and publishing schedule appear here after approval.</div>';
+}
+
+/* ---------- Tracking loop ---------- */
+function show(id) {
+  const st = campaignState(id);
+  $('#pipelineCard').hidden = false;
+  renderPipeline(st);
+  renderResults(st);
+  return st;
+}
+async function poll() {
+  try { await fetchData(); } catch (e) { setConn(false, e.message); }
+  if (!tracking) return;
+  if (!tracking.id) {
+    const match = data.log.find((r) => !tracking.knownIds.has(String(r['Campaign ID'])) && String(r['Brand']).trim() === tracking.product);
+    if (match) { tracking.id = String(match['Campaign ID']); $('#history').value = tracking.id; }
+  }
+  const st = tracking.id ? show(tracking.id) : (renderPipeline(null), null);
+  if (!tracking.id && Date.now() - tracking.startedAt > 4 * 60 * 1000) {
+    $('#pipeNote').textContent = 'No update from n8n yet. Check the Executions tab in n8n. The run may have failed, or the Status Log tab may not be connected.';
+  }
+  const done = st && (st.status === 'approved' || st.status === 'stopped');
+  if (done || Date.now() - tracking.startedAt > 30 * 60 * 1000) stopTracking();
+}
+function startTracking(t) {
+  stopTracking(); tracking = t;
+  clockTimer = setInterval(() => { if (tracking && !tracking.id) renderPipeline(null); else if (tracking) $('#elapsed').textContent = (() => { const s = Math.floor((Date.now() - tracking.startedAt) / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); })(); }, 1000);
+  pollTimer = setInterval(poll, 5000);
+}
+function stopTracking() { clearInterval(pollTimer); clearInterval(clockTimer); pollTimer = clockTimer = null; tracking = null; }
+
+/* ---------- Submit: same n8n workflow as the hosted form ---------- */
+$('#campaignForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const form = e.target;
+  const payload = {};
+  for (const k of ['Campaign Brief', 'Product Name', 'Campaign Goal', 'Brand Voice', 'Landing Page URL', 'Launch Date', 'Approver Email']) payload[k] = form.elements[k].value.trim();
+  store.set('approver', payload['Approver Email']);
+  const btn = $('#generate'); btn.disabled = true; btn.textContent = 'Starting…';
+
+  let knownIds = new Set();
+  try { knownIds = idsIn(await fetchData()); }
+  catch (err) { setConn(false, err.message); toast('Can\'t reach the Dashboard Data API. Check ⚙︎ settings and that the "Dashboard Data API" workflow is Active.', 7000); btn.disabled = false; btn.textContent = '✦ Generate Campaign'; return; }
+
+  try {
+    // text/plain keeps this a "simple" request (no CORS preflight); n8n's Dashboard Input parses it.
+    const res = await fetch(endpoint('campaign-dashboard-submit'), { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=UTF-8' }, body: JSON.stringify(payload) });
+    if (!res.ok) throw Object.assign(new Error('HTTP ' + res.status), { http: true });
+  } catch (err) {
+    if (err.http) { toast('n8n rejected the request (' + err.message + '). Is the main workflow Active? In Test mode, click "Execute workflow" first.', 8000); btn.disabled = false; btn.textContent = '✦ Generate Campaign'; return; }
+    // Network/CORS error: the request may still have reached n8n, so keep watching instead of re-sending.
+    toast('Couldn\'t read n8n\'s reply. Watching for the campaign anyway.', 6000);
+  }
+  btn.disabled = false; btn.textContent = '✦ Generate Campaign';
+  $('#results').hidden = true;
+  startTracking({ product: payload['Product Name'], knownIds, startedAt: Date.now(), id: null });
+  renderPipeline(null);
+  $('#pipelineCard').hidden = false;
+  $('#pipelineCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+/* ---------- History ---------- */
+$('#history').addEventListener('change', async (e) => {
+  const id = e.target.value; if (!id) return;
+  stopTracking();
+  const st = show(id);
+  $('#elapsed').textContent = st.status === 'approved' ? 'Done' : 'Live';
+  if (st.status !== 'approved' && st.status !== 'stopped') {
+    startTracking({ product: st.latestReview ? st.latestReview['Brand'] : '', knownIds: new Set(), startedAt: Date.now(), id });
+  }
+  $('#pipelineCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+/* ---------- Settings dialog ---------- */
+const dlg = $('#settings'), sf = $('#settingsForm');
+$('#openSettings').addEventListener('click', () => { sf.elements.base.value = cfg().base; sf.elements.mode.value = cfg().mode; $('#testResult').textContent = 'Uses /webhook/campaign-dashboard-submit and /webhook/campaign-dashboard-data.'; dlg.showModal(); });
+const saveSettings = () => { store.set('base', sf.elements.base.value.trim() || 'http://localhost:5678'); store.set('mode', sf.elements.mode.value || 'production'); };
+sf.addEventListener('submit', () => { saveSettings(); fetchData().then(() => toast('Connected to n8n.')).catch((err) => { setConn(false, err.message); toast('Saved, but the Dashboard Data API is not reachable yet.'); }); });
+$('#testConn').addEventListener('click', async () => {
+  saveSettings(); $('#testResult').textContent = 'Testing…';
+  try { const d = await fetchData(); $('#testResult').textContent = '✅ Connected. ' + idsIn(d).size + ' campaign(s) found.'; }
+  catch (err) { setConn(false, err.message); $('#testResult').textContent = '❌ ' + err.message + '. Is the "Dashboard Data API" workflow Active, and is CORS allowed on its webhook?'; }
+});
+
+/* ---------- Init ---------- */
+renderTemplates();
+$('#campaignForm').elements['Launch Date'].value = nextMonday();
+$('#campaignForm').elements['Approver Email'].value = store.get('approver', '');
+// Optional: ?n8n=http://host:5678 sets the base URL; #campaign=CMP-… opens a campaign directly.
+const qp = new URLSearchParams(location.search);
+if (qp.get('n8n')) store.set('base', qp.get('n8n'));
+fetchData().then(() => {
+  const m = location.hash.match(/campaign=([^&]+)/);
+  if (m) { const sel = $('#history'); sel.value = decodeURIComponent(m[1]); sel.dispatchEvent(new Event('change')); }
+}).catch((err) => setConn(false, err.message));
+</script>
+</body>
+</html>
