@@ -1,0 +1,13 @@
+# Secrets: API keys live only in n8n credentials, never in this repo
+.env
+.env.*
+!.env.example
+*.pem
+credentials*.json
+client_secret*.json
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+node_modules/

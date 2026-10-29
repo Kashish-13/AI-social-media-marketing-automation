@@ -1,0 +1,1070 @@
+{
+  "name": "AI-Powered Social Media Marketing Automation",
+  "nodes": [
+    {
+      "id": "9c270a38-d632-4129-bc29-dcd51e497d9a",
+      "name": "Note 0",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        120
+      ],
+      "parameters": {
+        "content": "## ① Campaign Intake\nA marketer submits a brief through a hosted form.",
+        "width": 520,
+        "height": 400,
+        "color": 7
+      }
+    },
+    {
+      "id": "706608b9-3561-4f5a-8af4-bb45ec01dde4",
+      "name": "Note 1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        460,
+        120
+      ],
+      "parameters": {
+        "content": "## ② AI Strategy Brain\n**Strategy Agent** → plan · **Audience Agent** → persona",
+        "width": 760,
+        "height": 600,
+        "color": 4
+      }
+    },
+    {
+      "id": "25091207-2dff-49cf-98c0-9e9d0906724a",
+      "name": "Note 2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1260,
+        120
+      ],
+      "parameters": {
+        "content": "## ③ Create → Review → Improve loop\nContent is scored out of 100. Below 75 → feedback goes back to the Content Agent (max 3 drafts).",
+        "width": 1600,
+        "height": 800,
+        "color": 5
+      }
+    },
+    {
+      "id": "c2b214af-547b-464a-be6a-2f44dd050463",
+      "name": "Note 3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2880,
+        0
+      ],
+      "parameters": {
+        "content": "## ④ Human Approval & Launch\nApprover gets an email with Approve / Reject buttons. Approved → schedule, summary, Google Sheets, final report.",
+        "width": 1700,
+        "height": 560,
+        "color": 6
+      }
+    },
+    {
+      "id": "7bd30c47-6821-4fae-964f-53b1516ee7a2",
+      "name": "Campaign Brief Form",
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        300
+      ],
+      "webhookId": "097b9620-c924-4692-b855-42e8d92047b6",
+      "parameters": {
+        "formTitle": "AI Social Media Campaign Generator",
+        "formDescription": "Describe your campaign. Four AI agents will plan it, write platform-native posts for LinkedIn, Instagram and X, score them, and send them to you for approval.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Campaign Brief",
+              "fieldType": "textarea",
+              "placeholder": "e.g. Launch an AI productivity tool for college students",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Product Name",
+              "placeholder": "e.g. StudyPilot",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Campaign Goal",
+              "fieldType": "dropdown",
+              "requiredField": true,
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Waitlist / Sign-ups"
+                  },
+                  {
+                    "option": "Product Launch Awareness"
+                  },
+                  {
+                    "option": "App Downloads"
+                  },
+                  {
+                    "option": "Event Registrations"
+                  },
+                  {
+                    "option": "Sales"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Brand Voice",
+              "fieldType": "dropdown",
+              "requiredField": true,
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "Friendly & Helpful"
+                  },
+                  {
+                    "option": "Bold & Energetic"
+                  },
+                  {
+                    "option": "Witty & Playful"
+                  },
+                  {
+                    "option": "Professional & Credible"
+                  }
+                ]
+              }
+            },
+            {
+              "fieldLabel": "Landing Page URL",
+              "placeholder": "https://..."
+            },
+            {
+              "fieldLabel": "Launch Date",
+              "fieldType": "date",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Approver Email",
+              "fieldType": "email",
+              "placeholder": "you@example.com",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false,
+          "respondWithOptions": {
+            "values": {
+              "formSubmittedText": "✅ Brief received! The AI agents are working. Check your inbox for the approval email in about 1–2 minutes."
+            }
+          }
+        }
+      }
+    },
+    {
+      "id": "9ebf2fcb-5bf5-49cd-9558-384883da6b64",
+      "name": "Campaign Input",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        300
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cd23e8c8-624e-4c35-b048-5f3c9d0555c3",
+              "name": "campaign_id",
+              "type": "string",
+              "value": "=CMP-{{ $now.toFormat('yyyyMMdd-HHmmss') }}"
+            },
+            {
+              "id": "dff7b5a0-0dbc-441f-822c-eafa206673bf",
+              "name": "created_at",
+              "type": "string",
+              "value": "={{ $now.toFormat('yyyy-MM-dd HH:mm') }}"
+            },
+            {
+              "id": "b9a525c3-47d5-4b76-8725-b5fa506f7542",
+              "name": "brief",
+              "type": "string",
+              "value": "={{ $json['Campaign Brief'] }}"
+            },
+            {
+              "id": "22c0896f-16dd-43d7-afa8-2a62cd680655",
+              "name": "brand_name",
+              "type": "string",
+              "value": "={{ $json['Product Name'] }}"
+            },
+            {
+              "id": "457893c9-194d-41e8-8edb-7fe13bc602c7",
+              "name": "campaign_goal",
+              "type": "string",
+              "value": "={{ $json['Campaign Goal'] }}"
+            },
+            {
+              "id": "311c4694-5faa-4775-9030-df1d6abac564",
+              "name": "brand_voice",
+              "type": "string",
+              "value": "={{ $json['Brand Voice'] }}"
+            },
+            {
+              "id": "ea0463ad-e30a-4586-990a-5179c2d270b8",
+              "name": "landing_url",
+              "type": "string",
+              "value": "={{ $json['Landing Page URL'] }}"
+            },
+            {
+              "id": "300985ee-d919-478e-b9d6-f9100a0735a6",
+              "name": "launch_date",
+              "type": "string",
+              "value": "={{ $json['Launch Date'] }}"
+            },
+            {
+              "id": "511dca92-9b27-4b8a-be5d-3dadc3fdaf2f",
+              "name": "approver_email",
+              "type": "string",
+              "value": "={{ $json['Approver Email'] }}"
+            },
+            {
+              "id": "db7d5bc4-482d-4390-a7dc-b6529dd370ef",
+              "name": "quality_threshold",
+              "type": "number",
+              "value": 75
+            },
+            {
+              "id": "686c14d9-fefb-4039-adaa-c2aba149f12a",
+              "name": "max_attempts",
+              "type": "number",
+              "value": 3
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "965013ea-d690-4b96-81f3-279b28373ef4",
+      "name": "Strategy Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        520,
+        300
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "=Create the campaign strategy for this brief.\n\nCAMPAIGN BRIEF: {{ $json.brief }}\nBRAND / PRODUCT NAME: {{ $json.brand_name }}\nCAMPAIGN GOAL: {{ $json.campaign_goal }}\nBRAND VOICE: {{ $json.brand_voice }}\nLANDING PAGE: {{ $json.landing_url || 'not provided' }}\nLAUNCH DATE: {{ $json.launch_date }}\n\nWork out: the real business objective, who will actually use this, the pain they feel today, the single angle that makes this campaign stand out from competitors, the right tone, and one primary call to action.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a senior growth marketing strategist with 15 years of experience launching consumer and B2B products to students and young professionals.\n\nYour job: turn a short campaign brief into a sharp, specific, actionable campaign strategy.\n\nRules:\n- Every field must be specific to THIS product and THIS audience. If a sentence could describe any product, rewrite it.\n- Never use filler such as \"revolutionize\", \"game-changer\", \"unlock your potential\", \"in today's fast-paced world\".\n- Pick ONE campaign angle (the big idea) and ONE primary CTA. Do not hedge with several.\n- If the brief is missing information, make realistic assumptions and list them in \"assumptions\".\n- KPIs must be measurable (e.g. \"500 waitlist sign-ups in 14 days\"), not vague (\"increase awareness\")."
+        }
+      }
+    },
+    {
+      "id": "c755745b-f8a9-4e31-8c42-4a364e46ade0",
+      "name": "Claude · Strategy",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        480,
+        540
+      ],
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5-5"
+        },
+        "options": {
+          "maxTokensToSample": 4096,
+          "temperature": 0.4
+        }
+      }
+    },
+    {
+      "id": "5aa3d629-c526-44e3-ad58-91c6b26c33dd",
+      "name": "Strategy Schema",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        660,
+        540
+      ],
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"campaign_name\": {\n      \"type\": \"string\",\n      \"description\": \"Short, memorable internal campaign name\"\n    },\n    \"objective\": {\n      \"type\": \"string\",\n      \"description\": \"The measurable business objective of the campaign\"\n    },\n    \"target_audience\": {\n      \"type\": \"string\",\n      \"description\": \"Primary audience in one specific sentence\"\n    },\n    \"pain_points\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      },\n      \"description\": \"3-5 specific pain points\"\n    },\n    \"campaign_angle\": {\n      \"type\": \"string\",\n      \"description\": \"The single big idea that makes this campaign stand out\"\n    },\n    \"key_message\": {\n      \"type\": \"string\",\n      \"description\": \"One-sentence core message\"\n    },\n    \"value_propositions\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    },\n    \"tone\": {\n      \"type\": \"string\",\n      \"description\": \"Recommended tone of voice, with 3 adjectives\"\n    },\n    \"primary_cta\": {\n      \"type\": \"string\",\n      \"description\": \"The one action we want people to take\"\n    },\n    \"kpis\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    },\n    \"assumptions\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    }\n  },\n  \"required\": [\n    \"campaign_name\",\n    \"objective\",\n    \"target_audience\",\n    \"pain_points\",\n    \"campaign_angle\",\n    \"key_message\",\n    \"value_propositions\",\n    \"tone\",\n    \"primary_cta\",\n    \"kpis\",\n    \"assumptions\"\n  ]\n}"
+      }
+    },
+    {
+      "id": "5fc1c301-c90e-4255-a34d-74bada7d03a2",
+      "name": "Audience Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        880,
+        300
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "=Build the audience intelligence profile for this campaign.\n\nORIGINAL BRIEF: {{ $('Campaign Input').first().json.brief }}\n\nSTRATEGY (from the Marketing Strategy Agent):\n{{ JSON.stringify($json.output, null, 2) }}\n\nGo deeper than the strategy: describe one primary persona, what they care about, what they scroll past, how they behave on each platform, which objections stop them from acting, and the messaging style that will feel native to them.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an audience research specialist and consumer psychologist.\n\nYour job: build a vivid audience intelligence profile that a copywriter can write to directly.\n\nRules:\n- Be concrete: real daily habits, real phrases this audience uses, real objections that stop them acting.\n- Avoid stereotypes and empty statements like \"they like technology\" or \"they are busy\".\n- Explain how the SAME person behaves differently on LinkedIn, Instagram and X.\n- \"words_they_use\" must be words or short phrases the audience would actually type or say.\n- \"best_hook_angles\" must be 3-5 opening angles a copywriter could turn directly into a first line."
+        }
+      }
+    },
+    {
+      "id": "ec915244-779c-41f6-93b9-be1855849894",
+      "name": "Claude · Audience",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        840,
+        540
+      ],
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5-5"
+        },
+        "options": {
+          "maxTokensToSample": 4096,
+          "temperature": 0.5
+        }
+      }
+    },
+    {
+      "id": "a64879aa-b4ad-43ea-978d-d84d754348ee",
+      "name": "Audience Schema",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        1020,
+        540
+      ],
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"persona\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"name\": {\n          \"type\": \"string\",\n          \"description\": \"Persona nickname, e.g. \\\"Deadline-Juggling Priya\\\"\"\n        },\n        \"age_range\": {\n          \"type\": \"string\"\n        },\n        \"description\": {\n          \"type\": \"string\"\n        },\n        \"a_day_in_their_life\": {\n          \"type\": \"string\"\n        }\n      },\n      \"required\": [\n        \"name\",\n        \"age_range\",\n        \"description\",\n        \"a_day_in_their_life\"\n      ]\n    },\n    \"interests\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    },\n    \"pain_points\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    },\n    \"motivations\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    },\n    \"objections\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      },\n      \"description\": \"Reasons they might NOT act\"\n    },\n    \"content_preferences\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"linkedin\": {\n          \"type\": \"string\"\n        },\n        \"instagram\": {\n          \"type\": \"string\"\n        },\n        \"x\": {\n          \"type\": \"string\"\n        }\n      },\n      \"required\": [\n        \"linkedin\",\n        \"instagram\",\n        \"x\"\n      ]\n    },\n    \"messaging_style\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"do\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          }\n        },\n        \"dont\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          }\n        },\n        \"words_they_use\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          }\n        }\n      },\n      \"required\": [\n        \"do\",\n        \"dont\",\n        \"words_they_use\"\n      ]\n    },\n    \"best_hook_angles\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    }\n  },\n  \"required\": [\n    \"persona\",\n    \"interests\",\n    \"pain_points\",\n    \"motivations\",\n    \"objections\",\n    \"content_preferences\",\n    \"messaging_style\",\n    \"best_hook_angles\"\n  ]\n}"
+      }
+    },
+    {
+      "id": "4bb90e44-e87f-4d70-b213-ae1707254e2a",
+      "name": "Start First Draft",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1300,
+        300
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ae23fb0b-3715-4f70-8abd-f231b69afc80",
+              "name": "feedback",
+              "type": "string",
+              "value": "None. This is the first draft."
+            },
+            {
+              "id": "36529793-3591-49d6-b168-32c8c78dff3a",
+              "name": "previous_draft",
+              "type": "string",
+              "value": "N/A"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "4b3e3023-ec49-4039-87ce-eaa48e1af850",
+      "name": "Content Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        1540,
+        300
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write the campaign content. This is draft attempt #{{ $runIndex + 1 }}.\n\nBRAND / PRODUCT: {{ $('Campaign Input').first().json.brand_name }}\nBRAND VOICE: {{ $('Campaign Input').first().json.brand_voice }}\nLANDING PAGE: {{ $('Campaign Input').first().json.landing_url || 'not provided' }}\n\nSTRATEGY:\n{{ JSON.stringify($('Strategy Agent').first().json.output, null, 2) }}\n\nAUDIENCE INTELLIGENCE:\n{{ JSON.stringify($('Audience Agent').first().json.output, null, 2) }}\n\nREVIEWER FEEDBACK ON THE PREVIOUS DRAFT:\n{{ $json.feedback }}\n\nPREVIOUS DRAFT (improve on it; do not repeat its weaknesses):\n{{ $json.previous_draft }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an award-winning social media copywriter who writes natively for each platform. You NEVER paste the same text across platforms; each platform gets its own angle, length, structure and rhythm.\n\nPLATFORM RULES\nLINKEDIN\n- 120-220 words. The first line is the hook: under 12 words, it must make people click \"...see more\".\n- Short paragraphs of 1-2 lines with white space between them.\n- Structure: hook, then a relatable story or insight, then the lesson or solution, then the CTA, then a question that invites comments.\n- Credible and specific. Max 2 emojis. 3-5 hashtags at the very end.\n\nINSTAGRAM\n- Caption of 60-150 words. The hook must land in the first 125 characters (before \"more\").\n- Conversational, emotional, relatable. Emojis are welcome as visual bullets.\n- The CTA says \"link in bio\"; never paste URLs into the caption.\n- 8-15 hashtags mixing broad, niche and one branded tag.\n- visual_concept: describe a 5-slide carousel (slide by slide) OR a 15-second Reel (shot by shot).\n\nX / TWITTER\n- Main post MAX 270 characters INCLUDING hashtags. Punchy, opinionated or curiosity-driven, never corporate.\n- 0-2 hashtags.\n- thread: 3-4 follow-up tweets that expand the idea, each max 270 characters, and the last one carries the CTA.\n\nGENERAL RULES\n- Write in the audience's own vocabulary (see \"words_they_use\").\n- One clear CTA per platform, aligned with the strategy's primary CTA.\n- Banned: \"game-changer\", \"revolutionize\", \"unlock\", \"elevate\", \"in today's fast-paced world\", \"look no further\".\n- No invented statistics, fake testimonials or fake user numbers.\n- Respect the brand voice.\n- If reviewer feedback is provided, fix EVERY problem it lists and keep what it praised."
+        }
+      }
+    },
+    {
+      "id": "a7c9d5af-7459-4759-b458-6648ecdc5457",
+      "name": "Claude · Content",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1500,
+        540
+      ],
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5-5"
+        },
+        "options": {
+          "maxTokensToSample": 4096,
+          "temperature": 0.8
+        }
+      }
+    },
+    {
+      "id": "669b9013-5b22-4d44-8671-23f20d2ce4f1",
+      "name": "Content Schema",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        1680,
+        540
+      ],
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"campaign_tagline\": {\n      \"type\": \"string\"\n    },\n    \"linkedin\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"hook\": {\n          \"type\": \"string\",\n          \"description\": \"First line, max 12 words\"\n        },\n        \"post\": {\n          \"type\": \"string\",\n          \"description\": \"Full ready-to-publish post: hook + body + CTA + hashtags\"\n        },\n        \"cta\": {\n          \"type\": \"string\"\n        },\n        \"hashtags\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          }\n        }\n      },\n      \"required\": [\n        \"hook\",\n        \"post\",\n        \"cta\",\n        \"hashtags\"\n      ]\n    },\n    \"instagram\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"hook\": {\n          \"type\": \"string\",\n          \"description\": \"First 125 characters of the caption\"\n        },\n        \"caption\": {\n          \"type\": \"string\",\n          \"description\": \"Full ready-to-publish caption including CTA and hashtags\"\n        },\n        \"cta\": {\n          \"type\": \"string\"\n        },\n        \"hashtags\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          }\n        },\n        \"visual_concept\": {\n          \"type\": \"string\",\n          \"description\": \"Carousel slide-by-slide outline or Reel concept\"\n        }\n      },\n      \"required\": [\n        \"hook\",\n        \"caption\",\n        \"cta\",\n        \"hashtags\",\n        \"visual_concept\"\n      ]\n    },\n    \"x\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"post\": {\n          \"type\": \"string\",\n          \"description\": \"Main post, max 270 characters including hashtags\"\n        },\n        \"thread\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          },\n          \"description\": \"3-4 follow-up tweets, each max 270 characters\"\n        },\n        \"cta\": {\n          \"type\": \"string\"\n        },\n        \"hashtags\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\"\n          }\n        }\n      },\n      \"required\": [\n        \"post\",\n        \"thread\",\n        \"cta\",\n        \"hashtags\"\n      ]\n    }\n  },\n  \"required\": [\n    \"campaign_tagline\",\n    \"linkedin\",\n    \"instagram\",\n    \"x\"\n  ]\n}"
+      }
+    },
+    {
+      "id": "e15792f6-c0d2-4909-9712-0e1ddf718a15",
+      "name": "Review Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        1900,
+        300
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "=Review this social media campaign draft (attempt #{{ $runIndex + 1 }}).\n\nBRAND VOICE: {{ $('Campaign Input').first().json.brand_voice }}\n\nSTRATEGY (what the content must deliver):\n{{ JSON.stringify($('Strategy Agent').first().json.output, null, 2) }}\n\nTARGET PERSONA:\n{{ JSON.stringify($('Audience Agent').first().json.output.persona, null, 2) }}\n\nDRAFT TO REVIEW:\n{{ JSON.stringify($json.output, null, 2) }}\n\nSYSTEM-MEASURED FACTS (trust these):\n- X post length: {{ $json.output.x.post.length }} characters (limit 280)\n- LinkedIn hook length: {{ $json.output.linkedin.hook.trim().split(/\\s+/).length }} words (limit 12)",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are the strict head of content at a top social media agency. You review every draft before it goes to the client.\n\nScore each criterion from 0 to 100:\n- hook: would the first line stop the scroll for THIS audience?\n- clarity: is the message instantly understandable?\n- engagement: will people like, comment, save or share it?\n- brand_alignment: does it match the brand voice and the campaign angle?\n- cta: is there one clear, compelling, low-friction next step?\n- grammar: spelling, grammar, punctuation, readability.\n- platform_fit: does each post follow its platform's native conventions?\n\nCalibration: average content scores 60-70, good content 75-85, exceptional content 90+. Do NOT give everything 90+.\n\nHard rules (any violation caps platform_fit at 60):\n- The X post is at most 280 characters (use the character count the system gives you; do not count yourself).\n- The LinkedIn hook is at most 12 words.\n- The Instagram CTA uses \"link in bio\" and the caption contains no URLs.\n- No invented statistics or fake testimonials.\n- The three platforms are not copies of each other.\n\noverall_score is your holistic 0-100 score.\nproblems and improvements must be specific and actionable. Quote the exact line you are criticising and say exactly what to change.\ndecision = \"APPROVE\" if overall_score >= 75, otherwise \"REGENERATE\"."
+        }
+      }
+    },
+    {
+      "id": "75be2268-a918-4488-826d-11cf51867959",
+      "name": "Claude · Review",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        1860,
+        540
+      ],
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5-5"
+        },
+        "options": {
+          "maxTokensToSample": 4096,
+          "temperature": 0.2
+        }
+      }
+    },
+    {
+      "id": "015c2192-bb55-419d-be36-495400590d67",
+      "name": "Review Schema",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        2040,
+        540
+      ],
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"scores\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"hook\": {\n          \"type\": \"number\"\n        },\n        \"clarity\": {\n          \"type\": \"number\"\n        },\n        \"engagement\": {\n          \"type\": \"number\"\n        },\n        \"brand_alignment\": {\n          \"type\": \"number\"\n        },\n        \"cta\": {\n          \"type\": \"number\"\n        },\n        \"grammar\": {\n          \"type\": \"number\"\n        },\n        \"platform_fit\": {\n          \"type\": \"number\"\n        }\n      },\n      \"required\": [\n        \"hook\",\n        \"clarity\",\n        \"engagement\",\n        \"brand_alignment\",\n        \"cta\",\n        \"grammar\",\n        \"platform_fit\"\n      ]\n    },\n    \"overall_score\": {\n      \"type\": \"number\",\n      \"description\": \"0-100\"\n    },\n    \"platform_feedback\": {\n      \"type\": \"object\",\n      \"properties\": {\n        \"linkedin\": {\n          \"type\": \"string\"\n        },\n        \"instagram\": {\n          \"type\": \"string\"\n        },\n        \"x\": {\n          \"type\": \"string\"\n        }\n      },\n      \"required\": [\n        \"linkedin\",\n        \"instagram\",\n        \"x\"\n      ]\n    },\n    \"strongest_element\": {\n      \"type\": \"string\"\n    },\n    \"problems\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    },\n    \"improvements\": {\n      \"type\": \"array\",\n      \"items\": {\n        \"type\": \"string\"\n      }\n    },\n    \"decision\": {\n      \"type\": \"string\",\n      \"enum\": [\n        \"APPROVE\",\n        \"REGENERATE\"\n      ]\n    }\n  },\n  \"required\": [\n    \"scores\",\n    \"overall_score\",\n    \"platform_feedback\",\n    \"strongest_element\",\n    \"problems\",\n    \"improvements\",\n    \"decision\"\n  ]\n}"
+      }
+    },
+    {
+      "id": "cf8018da-0f4b-46d6-a810-64a0d83cd2ec",
+      "name": "Evaluate Review",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2240,
+        300
+      ],
+      "parameters": {
+        "jsCode": "// Combines the draft + the review, recalculates the score deterministically,\n// and decides what happens next.\nconst review = $input.first().json.output;\nconst content = $('Content Agent').last().json.output;\nconst cfg = $('Campaign Input').first().json;\n\n// Weighted score (weights add up to 100). Code does the maths, not the AI.\nconst weights = { hook: 20, engagement: 20, platform_fit: 15, clarity: 15, brand_alignment: 10, cta: 10, grammar: 10 };\nlet weighted = 0;\nfor (const [key, weight] of Object.entries(weights)) {\n  weighted += (Number(review.scores[key]) || 0) * weight;\n}\nconst overall = Math.round(weighted / 100);\n\nconst attempt = $runIndex + 1; // 1st run of this node = draft 1, 2nd = draft 2 ...\nconst threshold = Number(cfg.quality_threshold);\nconst passed = overall >= threshold;\n\n// ---- Approval email (HTML) ----\nconst esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\\n/g, '<br>');\nconst bar = (label, v) =>\n  '<tr><td style=\"padding:4px 8px;font-size:13px\">' + label + '</td>' +\n  '<td style=\"padding:4px 8px;width:220px\"><div style=\"background:#eee;border-radius:4px\">' +\n  '<div style=\"width:' + Math.max(0, Math.min(100, v)) + '%;background:' + (v >= threshold ? '#16a34a' : '#f59e0b') + ';color:#fff;font-size:11px;padding:2px 6px;border-radius:4px\">' + v + '</div></div></td></tr>';\nconst card = (title, body) =>\n  '<div style=\"border:1px solid #e5e7eb;border-radius:8px;padding:14px;margin:12px 0\">' +\n  '<div style=\"font-weight:700;margin-bottom:8px\">' + title + '</div>' +\n  '<div style=\"font-size:14px;line-height:1.5\">' + body + '</div></div>';\n\nconst approval_html =\n  '<div style=\"font-family:Arial,sans-serif;max-width:640px\">' +\n  (passed ? '' : '<p style=\"background:#fef3c7;padding:10px;border-radius:6px\">⚠️ This draft did not reach the ' + threshold + ' quality bar after ' + attempt + ' attempts. Please review it carefully.</p>') +\n  '<h2 style=\"margin:0 0 4px\">' + esc(cfg.brand_name) + ': campaign ready for approval</h2>' +\n  '<p style=\"color:#555;margin:0 0 12px\">Campaign ' + esc(cfg.campaign_id) + ' · Draft #' + attempt + ' · <b>Score ' + overall + '/100</b></p>' +\n  '<p><i>\"' + esc(content.campaign_tagline) + '\"</i></p>' +\n  '<table>' + Object.keys(weights).map((k) => bar(k.replace('_', ' '), Number(review.scores[k]) || 0)).join('') + '</table>' +\n  card('💼 LinkedIn', esc(content.linkedin.post)) +\n  card('📸 Instagram', esc(content.instagram.caption) + '<br><br><b>Visual:</b> ' + esc(content.instagram.visual_concept)) +\n  card('𝕏 X / Twitter', esc(content.x.post) + '<br><br><b>Thread:</b><br>' + content.x.thread.map((t, i) => (i + 1) + '/ ' + esc(t)).join('<br>')) +\n  '<p><b>Reviewer\\'s favourite part:</b> ' + esc(review.strongest_element) + '</p>' +\n  '</div>';\n\nreturn [{\n  json: {\n    campaign_id: cfg.campaign_id,\n    attempt,\n    threshold,\n    overall_score: overall,\n    ai_overall_score: review.overall_score,\n    ai_decision: review.decision,\n    decision: passed ? 'APPROVE' : 'REGENERATE',\n    can_retry: attempt < Number(cfg.max_attempts),\n    scores: review.scores,\n    platform_feedback: review.platform_feedback,\n    strongest_element: review.strongest_element,\n    problems: review.problems,\n    improvements: review.improvements,\n    content,\n    approval_html\n  }\n}];"
+      }
+    },
+    {
+      "id": "78beffe5-dcfe-4fbf-b017-09056859db1c",
+      "name": "Score ≥ 75?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2460,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0f34274d-a355-44c8-812f-87191c2f6fd8",
+              "leftValue": "={{ $json.overall_score }}",
+              "rightValue": "={{ $json.threshold }}",
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "8370537c-3434-44a0-9d9f-1beade45c994",
+      "name": "Retries Left?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2680,
+        460
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d5865295-6ae4-4622-b354-1067191eaa58",
+              "leftValue": "={{ $json.can_retry }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "1973413f-158b-4035-95d1-52c62da65960",
+      "name": "Prepare Revision",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2680,
+        700
+      ],
+      "parameters": {
+        "jsCode": "// Builds the feedback package that is sent back to the Content Agent.\nconst r = $('Evaluate Review').last().json;\nconst humanRejected = $input.first().json.data?.approved === false;\n\nconst lines = [];\nif (humanRejected) {\n  lines.push('A HUMAN APPROVER REJECTED the previous draft. Write a noticeably different, stronger version with a fresh hook on every platform.');\n} else {\n  lines.push('The reviewer scored the previous draft ' + r.overall_score + '/100. The quality bar is ' + r.threshold + '.');\n}\nlines.push('', 'Scores: ' + JSON.stringify(r.scores));\nlines.push('', 'Problems to fix:');\nr.problems.forEach((p) => lines.push('- ' + p));\nlines.push('', 'Required improvements:');\nr.improvements.forEach((i) => lines.push('- ' + i));\nlines.push('', 'Per-platform feedback:');\nlines.push('- LinkedIn: ' + r.platform_feedback.linkedin);\nlines.push('- Instagram: ' + r.platform_feedback.instagram);\nlines.push('- X: ' + r.platform_feedback.x);\nlines.push('', 'Keep what worked: ' + r.strongest_element);\n\nreturn [{\n  json: {\n    feedback: lines.join('\\n'),\n    previous_draft: JSON.stringify(r.content, null, 2)\n  }\n}];"
+      }
+    },
+    {
+      "id": "4f98a115-a90c-42f7-8cbe-483e3dfa0ec3",
+      "name": "Human Approval",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2960,
+        280
+      ],
+      "webhookId": "fd7b818d-1307-414c-b52e-bdb19029c49a",
+      "parameters": {
+        "operation": "sendAndWait",
+        "sendTo": "={{ $('Campaign Input').first().json.approver_email }}",
+        "subject": "={{ $json.overall_score >= $json.threshold ? '✅' : '⚠️' }} Approve campaign: {{ $('Campaign Input').first().json.brand_name }} (score {{ $json.overall_score }}/100)",
+        "message": "={{ $json.approval_html }}",
+        "approvalOptions": {
+          "values": {
+            "approvalType": "double",
+            "approveLabel": "✅ Approve & Schedule",
+            "disapproveLabel": "❌ Reject & Rewrite"
+          }
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "9d4dbaef-cb51-4af6-b8a0-05cd854eac85",
+      "name": "Approved?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3180,
+        280
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "27e88f2a-a18f-46a6-9381-a43b8146b575",
+              "leftValue": "={{ $json.data.approved }}",
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "85117e10-4a77-4f7c-b42e-4473880e4dfc",
+      "name": "Publishing Schedule",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3400,
+        180
+      ],
+      "parameters": {
+        "jsCode": "// Builds a 6-post launch schedule from the launch date using platform best-practice times.\nconst cfg = $('Campaign Input').first().json;\nconst final = $('Evaluate Review').last().json;\n\nlet start = DateTime.fromISO(String(cfg.launch_date));\nif (!start.isValid) start = DateTime.now().plus({ days: 1 });\n\nconst slots = [\n  { day: 0, time: '09:00', platform: 'LinkedIn', item: 'Launch post', why: 'Professionals and students check LinkedIn at the start of the weekday' },\n  { day: 0, time: '12:30', platform: 'X', item: 'Launch post', why: 'Lunch-break scrolling peak; fast-moving feed rewards being early' },\n  { day: 0, time: '19:00', platform: 'Instagram', item: 'Launch carousel / Reel', why: 'Students are most active on Instagram in the evening' },\n  { day: 1, time: '17:30', platform: 'X', item: 'Follow-up thread', why: 'Second touch while launch momentum is still fresh' },\n  { day: 3, time: '08:30', platform: 'LinkedIn', item: 'Repost with a comment / early reactions', why: 'Re-surfaces the launch to people who missed day one' },\n  { day: 4, time: '20:00', platform: 'Instagram', item: 'Story reminder with link sticker', why: 'Stories drive clicks; evening reminder before the weekend' }\n];\n\n// LinkedIn engagement drops at weekends, so move those posts to Monday.\nconst skipWeekend = (d) => (d.weekday >= 6 ? d.plus({ days: 8 - d.weekday }) : d);\n\nconst schedule = slots.map((s) => {\n  let day = start.plus({ days: s.day });\n  if (s.platform === 'LinkedIn') day = skipWeekend(day);\n  const [h, m] = s.time.split(':').map(Number);\n  const at = day.set({ hour: h, minute: m, second: 0, millisecond: 0 });\n  return { platform: s.platform, item: s.item, publish_at: at.toFormat('ccc dd LLL yyyy, HH:mm'), iso: at.toISO(), why: s.why };\n}).sort((a, b) => a.iso.localeCompare(b.iso));\n\nconst schedule_text = schedule\n  .map((s) => '- ' + s.publish_at + ' | ' + s.platform + ' | ' + s.item + ' (' + s.why + ')')\n  .join('\\n');\n\nreturn [{ json: { campaign_id: cfg.campaign_id, final_score: final.overall_score, schedule, schedule_text } }];"
+      }
+    },
+    {
+      "id": "20ce4d27-f17b-4822-8a30-0217952ee732",
+      "name": "Campaign Summary",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [
+        3620,
+        180
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a campaign summary report for the marketing team.\n\nFormat: plain text, max 250 words, short headings in CAPITALS, \"-\" bullets. Do not use markdown symbols such as ** or #.\n\nInclude these sections:\nCAMPAIGN: name, product and objective\nAUDIENCE: one line\nBIG IDEA: the campaign angle and key message\nCONTENT: one line per platform describing what that post does\nQUALITY: final score and how many drafts it took\nSCHEDULE: the publishing schedule\nWEEK-ONE KPIs: 3 measurable KPIs to track\n\nDATA\nProduct: {{ $('Campaign Input').first().json.brand_name }}\nStrategy: {{ JSON.stringify($('Strategy Agent').first().json.output) }}\nPersona: {{ JSON.stringify($('Audience Agent').first().json.output.persona) }}\nTagline: {{ $('Evaluate Review').last().json.content.campaign_tagline }}\nFinal quality score: {{ $('Evaluate Review').last().json.overall_score }}/100 after {{ $('Evaluate Review').last().json.attempt }} draft(s)\nSchedule:\n{{ $json.schedule_text }}"
+      }
+    },
+    {
+      "id": "c77c34c1-ff5a-4332-8306-28e2ede9fffc",
+      "name": "Claude · Summary",
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        3640,
+        400
+      ],
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "id",
+          "value": "claude-sonnet-5-5"
+        },
+        "options": {
+          "maxTokensToSample": 4096,
+          "temperature": 0.3
+        }
+      }
+    },
+    {
+      "id": "39c8cc76-b396-44c6-bbe7-113a25bdac20",
+      "name": "Build Campaign Record",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3940,
+        180
+      ],
+      "parameters": {
+        "jsCode": "// One flat row for Google Sheets. The keys must match the sheet's header row exactly.\nconst cfg = $('Campaign Input').first().json;\nconst strategy = $('Strategy Agent').first().json.output;\nconst final = $('Evaluate Review').last().json;\nconst sched = $('Publishing Schedule').first().json;\nconst c = final.content;\n\nreturn [{\n  json: {\n    'Campaign ID': cfg.campaign_id,\n    'Created At': cfg.created_at,\n    'Brand': cfg.brand_name,\n    'Campaign Name': strategy.campaign_name,\n    'Brief': cfg.brief,\n    'Goal': cfg.campaign_goal,\n    'Target Audience': strategy.target_audience,\n    'Campaign Angle': strategy.campaign_angle,\n    'Tone': strategy.tone,\n    'Primary CTA': strategy.primary_cta,\n    'LinkedIn Post': c.linkedin.post,\n    'Instagram Caption': c.instagram.caption,\n    'Instagram Visual': c.instagram.visual_concept,\n    'X Post': c.x.post,\n    'X Thread': c.x.thread.join('\\n\\n'),\n    'Quality Score': final.overall_score,\n    'Score Breakdown': Object.entries(final.scores).map(([k, v]) => k + ': ' + v).join(', '),\n    'Drafts Needed': final.attempt,\n    'Status': 'Approved',\n    'Publishing Schedule': sched.schedule_text,\n    'Summary': $input.first().json.text\n  }\n}];"
+      }
+    },
+    {
+      "id": "cb20f806-b69c-4731-902a-d88e53433ed7",
+      "name": "Save to Google Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        4160,
+        180
+      ],
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "Campaigns"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": []
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "a5ca4a80-be51-4613-8797-849c3447a2f4",
+      "name": "Email Final Report",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        4380,
+        180
+      ],
+      "webhookId": "d18856d1-84b4-4da9-9ec4-a1126a8a8e39",
+      "parameters": {
+        "sendTo": "={{ $('Campaign Input').first().json.approver_email }}",
+        "subject": "=🚀 Campaign approved & scheduled: {{ $json['Campaign Name'] }}",
+        "emailType": "text",
+        "message": "={{ $json['Summary'] }}\n\n----\nFull content and schedule saved to Google Sheets (Campaign ID {{ $json['Campaign ID'] }}).",
+        "options": {
+          "appendAttribution": false
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Campaign Brief Form": {
+      "main": [
+        [
+          {
+            "node": "Campaign Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Campaign Input": {
+      "main": [
+        [
+          {
+            "node": "Strategy Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Strategy Agent": {
+      "main": [
+        [
+          {
+            "node": "Audience Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Audience Agent": {
+      "main": [
+        [
+          {
+            "node": "Start First Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start First Draft": {
+      "main": [
+        [
+          {
+            "node": "Content Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Content Agent": {
+      "main": [
+        [
+          {
+            "node": "Review Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Review Agent": {
+      "main": [
+        [
+          {
+            "node": "Evaluate Review",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluate Review": {
+      "main": [
+        [
+          {
+            "node": "Score ≥ 75?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Score ≥ 75?": {
+      "main": [
+        [
+          {
+            "node": "Human Approval",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Retries Left?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retries Left?": {
+      "main": [
+        [
+          {
+            "node": "Prepare Revision",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Human Approval",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Revision": {
+      "main": [
+        [
+          {
+            "node": "Content Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Human Approval": {
+      "main": [
+        [
+          {
+            "node": "Approved?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Approved?": {
+      "main": [
+        [
+          {
+            "node": "Publishing Schedule",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Revision",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publishing Schedule": {
+      "main": [
+        [
+          {
+            "node": "Campaign Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Campaign Summary": {
+      "main": [
+        [
+          {
+            "node": "Build Campaign Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Campaign Record": {
+      "main": [
+        [
+          {
+            "node": "Save to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save to Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "Email Final Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude · Strategy": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Strategy Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude · Audience": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Audience Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude · Content": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Content Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude · Review": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Review Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude · Summary": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Campaign Summary",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Strategy Schema": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Strategy Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Audience Schema": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Audience Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Content Schema": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Content Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Review Schema": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Review Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "meta": {
+    "templateCredsSetupCompleted": false
+  }
+}

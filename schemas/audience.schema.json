@@ -1,0 +1,117 @@
+{
+  "type": "object",
+  "properties": {
+    "persona": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Persona nickname, e.g. \"Deadline-Juggling Priya\""
+        },
+        "age_range": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "a_day_in_their_life": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "age_range",
+        "description",
+        "a_day_in_their_life"
+      ]
+    },
+    "interests": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "pain_points": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "motivations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "objections": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Reasons they might NOT act"
+    },
+    "content_preferences": {
+      "type": "object",
+      "properties": {
+        "linkedin": {
+          "type": "string"
+        },
+        "instagram": {
+          "type": "string"
+        },
+        "x": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "linkedin",
+        "instagram",
+        "x"
+      ]
+    },
+    "messaging_style": {
+      "type": "object",
+      "properties": {
+        "do": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "dont": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "words_they_use": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "do",
+        "dont",
+        "words_they_use"
+      ]
+    },
+    "best_hook_angles": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "persona",
+    "interests",
+    "pain_points",
+    "motivations",
+    "objections",
+    "content_preferences",
+    "messaging_style",
+    "best_hook_angles"
+  ]
+}

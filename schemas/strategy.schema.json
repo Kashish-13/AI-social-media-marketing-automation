@@ -1,0 +1,71 @@
+{
+  "type": "object",
+  "properties": {
+    "campaign_name": {
+      "type": "string",
+      "description": "Short, memorable internal campaign name"
+    },
+    "objective": {
+      "type": "string",
+      "description": "The measurable business objective of the campaign"
+    },
+    "target_audience": {
+      "type": "string",
+      "description": "Primary audience in one specific sentence"
+    },
+    "pain_points": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "3-5 specific pain points"
+    },
+    "campaign_angle": {
+      "type": "string",
+      "description": "The single big idea that makes this campaign stand out"
+    },
+    "key_message": {
+      "type": "string",
+      "description": "One-sentence core message"
+    },
+    "value_propositions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "tone": {
+      "type": "string",
+      "description": "Recommended tone of voice, with 3 adjectives"
+    },
+    "primary_cta": {
+      "type": "string",
+      "description": "The one action we want people to take"
+    },
+    "kpis": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  },
+  "required": [
+    "campaign_name",
+    "objective",
+    "target_audience",
+    "pain_points",
+    "campaign_angle",
+    "key_message",
+    "value_propositions",
+    "tone",
+    "primary_cta",
+    "kpis",
+    "assumptions"
+  ]
+}

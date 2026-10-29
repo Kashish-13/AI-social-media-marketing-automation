@@ -1,0 +1,106 @@
+{
+  "type": "object",
+  "properties": {
+    "campaign_tagline": {
+      "type": "string"
+    },
+    "linkedin": {
+      "type": "object",
+      "properties": {
+        "hook": {
+          "type": "string",
+          "description": "First line, max 12 words"
+        },
+        "post": {
+          "type": "string",
+          "description": "Full ready-to-publish post: hook + body + CTA + hashtags"
+        },
+        "cta": {
+          "type": "string"
+        },
+        "hashtags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "hook",
+        "post",
+        "cta",
+        "hashtags"
+      ]
+    },
+    "instagram": {
+      "type": "object",
+      "properties": {
+        "hook": {
+          "type": "string",
+          "description": "First 125 characters of the caption"
+        },
+        "caption": {
+          "type": "string",
+          "description": "Full ready-to-publish caption including CTA and hashtags"
+        },
+        "cta": {
+          "type": "string"
+        },
+        "hashtags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "visual_concept": {
+          "type": "string",
+          "description": "Carousel slide-by-slide outline or Reel concept"
+        }
+      },
+      "required": [
+        "hook",
+        "caption",
+        "cta",
+        "hashtags",
+        "visual_concept"
+      ]
+    },
+    "x": {
+      "type": "object",
+      "properties": {
+        "post": {
+          "type": "string",
+          "description": "Main post, max 270 characters including hashtags"
+        },
+        "thread": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "3-4 follow-up tweets, each max 270 characters"
+        },
+        "cta": {
+          "type": "string"
+        },
+        "hashtags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "post",
+        "thread",
+        "cta",
+        "hashtags"
+      ]
+    }
+  },
+  "required": [
+    "campaign_tagline",
+    "linkedin",
+    "instagram",
+    "x"
+  ]
+}
