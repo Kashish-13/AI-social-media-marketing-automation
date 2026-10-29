@@ -96,7 +96,7 @@ If you self-host, you first need your own Google OAuth client. See `docs/BUILD_G
 
 For a permanent link, toggle the workflow to **Active** and use the form's **Production URL**.
 
-Step-by-step test cases (forcing the loop, testing rejection, testing the happy path) are in `docs/BUILD_GUIDE.md` Part 5.
+
 
 ---
 
