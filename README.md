@@ -120,7 +120,7 @@ For a permanent link, toggle the workflow to **Active** and use the form's **Pro
 
 [`dashboard/index.html`](dashboard/index.html) is a SaaS-style frontend with templates, a live pipeline, strategy/audience/content cards, the quality score, suggestions, approval status and the summary. It reads real data through the read-only **Dashboard Data API** workflow (`dashboard-data-api.json`). Setup and the 1-minute Loom flow are in [`dashboard/README.md`](dashboard/README.md).
 
-> The newest workflow and dashboard files are in the **project root** (`ai-social-media-marketing-automation.json`, `build-workflow.js`, `dashboard-data-api.json`). The copies in `workflow/` and `scripts/` predate the latest fixes.
+> The newest workflow and dashboard files in the **project root** (`ai-social-media-marketing-automation.json`, `build-workflow.js`, `dashboard-data-api.json`). The copies in `workflow/` and `scripts/` predate the latest fixes.
 
 ## Demo
 
