@@ -75,7 +75,6 @@ In n8n, go to **Overview → Create → Credential** and create:
 2. **Google Sheets OAuth2 API:** click **Sign in with Google**.
 3. **Gmail OAuth2 API:** click **Sign in with Google**.
 
-If you self-host, you first need your own Google OAuth client. See `docs/BUILD_GUIDE.md` §1.3.
 
 ### 3. Create the Google Sheet
 1. Create a new sheet and rename its first tab to **`Campaigns`**.
